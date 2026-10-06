@@ -39,9 +39,13 @@
   /* ---------- theme ---------- */
   function applyTheme() {
     document.documentElement.dataset.theme = prefs.theme;
-    $('#themeBtn').textContent = prefs.theme === 'dark' ? '🌙' : '☀️';
+    const icon = prefs.theme === 'dark' ? '🌙' : '☀️';
+    const tb = $('#themeBtn'); if (tb) tb.textContent = icon;
+    const mb = $('#mobileThemeBtn'); if (mb) mb.textContent = icon;
+    const mt = $('#metaThemeColor'); if (mt) mt.setAttribute('content', prefs.theme === 'dark' ? '#0b0e17' : '#f8fafc');
   }
   $('#themeBtn').onclick = () => { prefs.theme = prefs.theme === 'dark' ? 'light' : 'dark'; savePrefs(); applyTheme(); };
+  $('#mobileThemeBtn')?.addEventListener('click', () => { prefs.theme = prefs.theme === 'dark' ? 'light' : 'dark'; savePrefs(); applyTheme(); });
 
   /* ---------- sidebar nav ---------- */
   function renderNav() {
@@ -151,12 +155,14 @@
     $('#overallBar').style.width = pct + '%';
     $('#overallCount').textContent = `${n} / ${total} প্রশ্ন`;
     const hd = $('#heroDone'); if (hd) hd.textContent = n;
+    const mp = $('#mobileProgressPill'); if (mp) mp.textContent = `${pct}% সম্পন্ন (${n}/${total})`;
     DATA.forEach((cat) => {
       const c = cat.items.filter((_, i) => done.has(`${cat.id}-${i + 1}`)).length;
       const p = Math.round((c / cat.items.length) * 100);
       const ring = $(`[data-ring="${cat.id}"]`); if (ring) ring.style.setProperty('--p', p);
       const cp = $(`[data-cp="${cat.id}"]`); if (cp) cp.textContent = `${c}/${cat.items.length} done`;
     });
+    renderSheetTopics();
   }
 
   /* ---------- category toggle helper ---------- */
@@ -262,10 +268,28 @@
     return html.replace(/(^|>)([^<]+)(?=<|$)/g, (m, a, txt) => a + txt.replace(re, (x) => `<mark>${x}</mark>`));
   }
   let st;
-  $('#search').addEventListener('input', () => { clearTimeout(st); st = setTimeout(applyFilter, 180); });
+  const searchInput = $('#search');
+  const searchClear = $('#searchClear');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(st);
+      st = setTimeout(applyFilter, 180);
+      if (searchClear) searchClear.style.display = searchInput.value ? 'flex' : 'none';
+    });
+  }
+  if (searchClear) {
+    searchClear.addEventListener('click', () => {
+      if (searchInput) {
+        searchInput.value = '';
+        searchClear.style.display = 'none';
+        applyFilter();
+        searchInput.focus();
+      }
+    });
+  }
   document.addEventListener('keydown', (e) => {
-    if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); $('#search').focus(); }
-    if (e.key === 'Escape') { closeQuiz(); $('#sidebar').classList.remove('open'); }
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); $('#search')?.focus(); }
+    if (e.key === 'Escape') { closeQuiz(); $('#sidebar')?.classList.remove('open'); closeAllSheets(); }
   });
 
   /* ---------- speech (English pronunciation) ---------- */
@@ -329,21 +353,270 @@
     updateProgress(); nextQuiz();
   };
 
+  /* ---------- mobile bottom navigation & bottom sheets ---------- */
+  const sheetBackdrop = $('#sheetBackdrop');
+  const topicsSheet = $('#topicsSheet');
+  const menuSheet = $('#menuSheet');
+
+  function closeAllSheets() {
+    if (sheetBackdrop) sheetBackdrop.classList.remove('active');
+    if (topicsSheet) topicsSheet.classList.remove('open');
+    if (menuSheet) menuSheet.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function showSheet(sheet) {
+    if (!sheet) return;
+    closeAllSheets();
+    if (sheetBackdrop) sheetBackdrop.classList.add('active');
+    sheet.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  if (sheetBackdrop) sheetBackdrop.onclick = closeAllSheets;
+  $('#topicsSheetClose')?.addEventListener('click', closeAllSheets);
+  $('#menuSheetClose')?.addEventListener('click', closeAllSheets);
+
+  // Render topics list in topicsSheet
+  function renderSheetTopics() {
+    const list = $('#sheetTopicsList');
+    if (!list) return;
+    const filterInput = $('#sheetTopicsSearch');
+    const q = filterInput ? filterInput.value.toLowerCase().trim() : '';
+
+    const filtered = DATA.filter((c) => {
+      if (!q) return true;
+      return c.title.toLowerCase().includes(q) || c.id.toLowerCase().includes(q);
+    });
+
+    list.innerHTML = filtered.map((c) => {
+      const doneCount = c.items.filter((_, i) => done.has(`${c.id}-${i + 1}`)).length;
+      const pct = Math.round((doneCount / c.items.length) * 100);
+      return `<a class="sheet-cat-item" href="#${c.id}" data-cat="${c.id}">
+        <span class="cat-ic">${c.icon}</span>
+        <div class="cat-info">
+          <span class="cat-nm">${esc(c.title)}</span>
+          <span class="cat-meta">${c.items.length}টি প্রশ্ন · ${doneCount}টি সম্পন্ন (${pct}%)</span>
+        </div>
+        <div class="cat-rt">
+          <span class="mini-ring" style="--p:${pct}"></span>
+          <span class="chev">›</span>
+        </div>
+      </a>`;
+    }).join('') || `<div class="empty" style="padding:20px;text-align:center;color:var(--muted)">কোনো মডিউল মেলেনি</div>`;
+
+    list.querySelectorAll('.sheet-cat-item').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const catId = a.dataset.cat;
+        closeAllSheets();
+        const target = document.getElementById(catId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          target.style.transition = 'box-shadow 0.4s ease';
+          target.style.boxShadow = '0 0 0 3px var(--accent)';
+          setTimeout(() => { target.style.boxShadow = ''; }, 1600);
+        }
+      });
+    });
+  }
+
+  $('#sheetTopicsSearch')?.addEventListener('input', () => {
+    renderSheetTopics();
+  });
+
+  // Mobile Horizontal Category Chips Carousel
+  function renderMobileCatChips() {
+    const track = $('#mobileCatChipsTrack');
+    if (!track) return;
+    const totalCount = ALL.length;
+    let html = `<button class="cat-chip active" data-cat="all">⚡ সব (${totalCount})</button>`;
+    html += DATA.map((c) => `<button class="cat-chip" data-cat="${c.id}">${c.icon} ${esc(c.title.split(' ')[0])}</button>`).join('');
+    track.innerHTML = html;
+
+    track.querySelectorAll('.cat-chip').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        track.querySelectorAll('.cat-chip').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const catId = btn.dataset.cat;
+        if (catId === 'all') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          const target = document.getElementById(catId);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            target.style.transition = 'box-shadow 0.4s ease';
+            target.style.boxShadow = '0 0 0 3px var(--accent)';
+            setTimeout(() => { target.style.boxShadow = ''; }, 1600);
+          }
+        }
+        btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      });
+    });
+  }
+
+  // Touch gesture to drag-down to dismiss bottom sheets
+  function attachSheetDrag(sheet) {
+    if (!sheet) return;
+    const handle = sheet.querySelector('.sheet-handle-bar') || sheet.querySelector('.sheet-header');
+    if (!handle) return;
+    let startY = 0;
+    let currentY = 0;
+    let dragging = false;
+
+    handle.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+      currentY = startY;
+      dragging = true;
+      sheet.style.transition = 'none';
+    }, { passive: true });
+
+    handle.addEventListener('touchmove', (e) => {
+      if (!dragging) return;
+      currentY = e.touches[0].clientY;
+      const deltaY = currentY - startY;
+      if (deltaY > 0) {
+        sheet.style.transform = `translateY(${deltaY}px)`;
+      }
+    }, { passive: true });
+
+    handle.addEventListener('touchend', () => {
+      if (!dragging) return;
+      dragging = false;
+      sheet.style.transition = 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+      const deltaY = currentY - startY;
+      if (deltaY > 75) {
+        closeAllSheets();
+      } else {
+        sheet.style.transform = 'translateY(0)';
+      }
+    });
+  }
+
+  attachSheetDrag(topicsSheet);
+  attachSheetDrag(menuSheet);
+
+  // Update menu sheet status indicators
+  function updateMenuSheetState() {
+    const themeIcon = $('#sheetThemeIcon');
+    const themeLabel = $('#sheetThemeLabel');
+    if (themeIcon) themeIcon.textContent = prefs.theme === 'dark' ? '🌙' : '☀️';
+    if (themeLabel) themeLabel.textContent = prefs.theme === 'dark' ? 'ডার্ক মোড' : 'লাইট মোড';
+
+    const hideDoneLabel = $('#sheetHideDoneLabel');
+    if (hideDoneLabel) hideDoneLabel.textContent = prefs.hideDone ? 'লুকানো আছে' : 'সব দেখাচ্ছে';
+
+    const expandLabel = $('#sheetExpandLabel');
+    if (expandLabel) expandLabel.textContent = allOpen ? 'সব বন্ধ করো' : 'সব খোলো';
+
+    $$('#sheetLangSeg button').forEach((b) => b.classList.toggle('active', b.dataset.lang === prefs.lang));
+  }
+
+  // Mobile Bottom Bar tab clicks
+  const bottomNav = $('#mobileBottomBar');
+  if (bottomNav) {
+    bottomNav.addEventListener('click', (e) => {
+      const tab = e.target.closest('.nav-tab');
+      if (!tab) return;
+      const action = tab.dataset.tab;
+      $$('.nav-tab').forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      if (action === 'home') {
+        closeAllSheets();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (action === 'topics') {
+        renderSheetTopics();
+        showSheet(topicsSheet);
+      } else if (action === 'search') {
+        closeAllSheets();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => {
+          const s = $('#search');
+          if (s) { s.focus(); s.select(); }
+        }, 250);
+      } else if (action === 'mock') {
+        closeAllSheets();
+        openQuiz();
+      } else if (action === 'menu') {
+        updateMenuSheetState();
+        showSheet(menuSheet);
+      }
+    });
+  }
+
+  // Menu Sheet Quick Actions
+  $('#sheetToggleTheme')?.addEventListener('click', () => {
+    $('#themeBtn').click();
+    updateMenuSheetState();
+  });
+
+  $('#sheetToggleHideDone')?.addEventListener('click', () => {
+    $('#hideDoneBtn').click();
+    updateMenuSheetState();
+  });
+
+  $('#sheetToggleAllQuestions')?.addEventListener('click', () => {
+    $('#expandBtn').click();
+    updateMenuSheetState();
+  });
+
+  $('#sheetResetProgress')?.addEventListener('click', () => {
+    closeAllSheets();
+    $('#resetBtn').click();
+  });
+
+  $('#sheetLangSeg')?.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    prefs.lang = b.dataset.lang;
+    savePrefs();
+    applyLang();
+    updateMenuSheetState();
+  });
+
   /* ---------- misc ---------- */
   $('#menuBtn').onclick = () => $('#sidebar').classList.toggle('open');
-  window.addEventListener('scroll', () => $('#toTop').classList.toggle('show', scrollY > 600), { passive: true });
+  window.addEventListener('scroll', () => {
+    $('#toTop').classList.toggle('show', scrollY > 600);
+    // highlight home tab when near top
+    if (scrollY < 300) {
+      const homeTab = $('#tabHome');
+      if (homeTab && !document.querySelector('.bottom-sheet.open')) {
+        $$('.nav-tab').forEach((t) => t.classList.remove('active'));
+        homeTab.classList.add('active');
+      }
+      const allChip = $('#mobileCatChipsTrack .cat-chip[data-cat="all"]');
+      if (allChip) {
+        $$('#mobileCatChipsTrack .cat-chip').forEach((c) => c.classList.remove('active'));
+        allChip.classList.add('active');
+      }
+    }
+  }, { passive: true });
   $('#toTop').onclick = () => scrollTo({ top: 0 });
 
   // active nav on scroll
   const io = new IntersectionObserver((entries) => {
-    entries.forEach((en) => { if (en.isIntersecting) { $$('.nav-item').forEach((a) => a.classList.toggle('active', a.dataset.id === en.target.id)); } });
-  }, { rootMargin: '-40% 0px -55% 0px' });
+    entries.forEach((en) => {
+      if (en.isIntersecting) {
+        $$('.nav-item').forEach((a) => a.classList.toggle('active', a.dataset.id === en.target.id));
+        const activeChip = $(`#mobileCatChipsTrack .cat-chip[data-cat="${en.target.id}"]`);
+        if (activeChip) {
+          $$('#mobileCatChipsTrack .cat-chip').forEach((c) => c.classList.remove('active'));
+          activeChip.classList.add('active');
+          activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }
+    });
+  }, { rootMargin: '-30% 0px -55% 0px' });
 
   /* ---------- init ---------- */
   applyTheme();
   renderNav();
   renderTop();
   renderCategories();
+  renderMobileCatChips();
+  renderSheetTopics();
   updateProgress();
   applyFilter();
   $$('.cat').forEach((c) => io.observe(c));
