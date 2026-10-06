@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Full Stack Interview Prep — RangdhanuIT | বাংলা + English Q&amp;A</title>
+  <meta name="description" content="RangdhanuIT Junior Full Stack Web Developer interview preparation: JavaScript, React, Next.js, Node, Express, REST API, Database, Git — বাংলা, English ও মিক্স উত্তর, সাথে Dokani, PTTABD ও Lakdhanavi project deep-dive." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🌈</div>
+      <div>
+        <div class="brand-title">Interview Prep</div>
+        <div class="brand-sub">RangdhanuIT · Full Stack</div>
+      </div>
+    </div>
+    <div class="overall">
+      <div class="overall-row"><span>মোট প্রস্তুতি</span><b id="overallPct">0%</b></div>
+      <div class="bar"><i id="overallBar"></i></div>
+      <div class="overall-row small"><span id="overallCount">0 / 0</span><button class="link-btn" id="resetBtn" title="সব progress মুছে ফেলো">Reset</button></div>
+    </div>
+    <nav id="nav" aria-label="Categories"></nav>
+  </aside>
+
+  <div class="main-wrap">
+    <header class="topbar">
+      <button class="icon-btn mobile-only" id="menuBtn" aria-label="Menu">☰</button>
+      <div class="search">
+        <span>🔍</span>
+        <input id="search" type="search" placeholder="প্রশ্ন বা উত্তর খুঁজো… ( / চাপো )" autocomplete="off" />
+      </div>
+      <div class="seg" id="langSeg" role="tablist" aria-label="Answer language">
+        <button data-lang="mix" class="active">মিক্স</button>
+        <button data-lang="bn">বাংলা</button>
+        <button data-lang="en">English</button>
+        <button data-lang="all">সব</button>
+      </div>
+      <div class="top-actions">
+        <button class="btn ghost" id="expandBtn">সব খোলো</button>
+        <button class="btn ghost" id="hideDoneBtn">Done লুকাও</button>
+        <button class="btn primary" id="quizBtn">🎯 Mock Interview</button>
+        <button class="icon-btn" id="themeBtn" aria-label="Theme">🌙</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="home">
+        <div class="hero-text">
+          <span class="pill">Junior Full Stack Web Developer · RangdhanuIT</span>
+          <h1>বাস্তব অভিজ্ঞতা দিয়ে উত্তর দাও,<br /><span class="grad">মুখস্থ theory দিয়ে না।</span></h1>
+          <p>প্রতিটা প্রশ্নের তিনভাবে উত্তর — <b>মিক্স</b> (interview-এ যেভাবে মুখে বলবে), <b>শুদ্ধ বাংলা</b>, আর <b>সহজ English</b>। English উত্তরের পাশে 🔊 চাপলে উচ্চারণ শুনতে পারবে। কার্ডের ✓ চাপলে progress save হবে।</p>
+          <div class="hero-stats" id="heroStats"></div>
+        </div>
+        <div class="hero-card glass">
+          <h3>🔥 Priority Order</h3>
+          <div class="tier t1"><b>Tier 1</b> JavaScript · React · Next.js · Node · Express · REST API · Auth · Git</div>
+          <div class="tier t2"><b>Tier 2</b> MongoDB · PostgreSQL · HTML/CSS · Tailwind · Responsive · TypeScript</div>
+          <div class="tier t3"><b>Tier 3</b> Redux/RTK Query · NestJS · Docker · Linux/Nginx/PM2 · SEO</div>
+          <div class="tier tp"><b>Projects</b> Dokani · PTTABD LMS · Lakdhanavi — deep dive</div>
+        </div>
+      </section>
+
+      <section class="block" id="must">
+        <h2 class="block-title">🎯 ১০টি Must-Practice Scenario <small>— আয়নার সামনে জোরে জোরে বলো</small></h2>
+        <div class="must-grid" id="mustGrid"></div>
+      </section>
+
+      <section class="block" id="pitch">
+        <h2 class="block-title">🗣️ নিজের পরিচয় — ৬০ সেকেন্ডের Pitch</h2>
+        <div class="pitch glass" id="pitchBox"></div>
+      </section>
+
+      <div id="categories"></div>
+
+      <footer class="foot">
+        <p>টিপ: উত্তর পড়ে মুখস্থ কোরো না — নিজের ভাষায় বলো, আর প্রতিটা উত্তরে অন্তত একটা <b>“আমি Dokani-তে…”</b> উদাহরণ যোগ করো।</p>
+        <p class="muted">⚠️ PTTABD অংশটা সাধারণ LMS অভিজ্ঞতা ধরে লেখা — নিজের আসল implementation-এর সাথে মিলিয়ে নিও।</p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Mock interview modal -->
+  <div class="modal" id="quizModal" aria-hidden="true">
+    <div class="modal-card glass">
+      <div class="modal-head">
+        <div>
+          <div class="muted small" id="quizMeta">—</div>
+          <h3>🎯 Mock Interview</h3>
+        </div>
+        <div class="modal-tools">
+          <select id="quizCat"></select>
+          <button class="icon-btn" id="quizClose" aria-label="Close">✕</button>
+        </div>
+      </div>
+      <div class="quiz-q" id="quizQ"></div>
+      <div class="quiz-timer"><span id="quizTimer">00:00</span> — উত্তরটা আগে মুখে বলো, তারপর দেখো</div>
+      <div class="quiz-a" id="quizA" hidden></div>
+      <div class="modal-foot">
+        <button class="btn ghost" id="quizReveal">উত্তর দেখাও</button>
+        <button class="btn ghost" id="quizKnown">✓ পারি</button>
+        <button class="btn primary" id="quizNext">পরের প্রশ্ন →</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Back to top">↑</button>
+
+  <script src="data/data-1-js-ts.js"></script>
+  <script src="data/data-2-react-next.js"></script>
+  <script src="data/data-3-node-api.js"></script>
+  <script src="data/data-4-db.js"></script>
+  <script src="data/data-5-git-css.js"></script>
+  <script src="data/data-6-redux-nest.js"></script>
+  <script src="data/data-7-devops-seo.js"></script>
+  <script src="data/data-8-arch-hr.js"></script>
+  <script src="data/data-9-projects.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
