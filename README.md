@@ -13,7 +13,12 @@ A modern, interactive interview preparation and revision web application tailore
 - **🎯 Mock Interview Simulator**: Random question selector with practice timer.
 - **⚡ Instant Search (`/`)**: Real-time keyword filtering with search term highlighting.
 - **📊 Progress Tracker**: LocalStorage-persisted checklists and percentage meters.
-- **🌓 Dark & Light Glassmorphism UI**: High-end modern styling with responsive mobile drawer layout.
+- **📱 Native Mobile-First App Experience**:
+  - Docked SVG bottom navigation bar (`Home`, `Modules [19]`, `Search`, `Mock Test`, `Tools`).
+  - Horizontal touch category carousel track with auto-centering & scroll sync.
+  - Pull-up Bottom Sheet drawers with live category search and swipe-down dismiss gestures.
+  - Safe-area insets padding (`viewport-fit=cover`) and touch-optimized tap targets.
+- **🌓 Dark & Light Glassmorphism UI**: High-end modern styling with responsive desktop & mobile layouts.
 
 ---
 
@@ -52,15 +57,17 @@ A modern, interactive interview preparation and revision web application tailore
     - Multi-provider SMS fallback strategy
     - Background automation crons & Docker/Nginx/VPS deployment
 18. **PTTABD LMS Platform** (10 questions):
-    - Course curriculum tree hierarchy
-    - HLS video streaming & signed URLs for piracy prevention
-    - Real-time student progress calculation & caching
-    - Quiz auto-grading & server-synchronized timers
-    - Dynamic PDF certificate generation
+    - Layered Express v5 + TypeScript architecture (Routes → Controllers → Services → Repository)
+    - bKash Tokenized Payment API (`/checkout/create` & `/checkout/execute`) with automated enrollment & receipts
+    - Shared-port Socket.io middleware (`req.io = io`) for real-time class chats & alerts
+    - Prisma Named Relations (`StudentSubmissions` & `GradedBy`) and multi-role mapping
+    - Installment milestone payment gating & access restrictions
+    - node-cron automation (10 AM installment reminders & scheduled module unlocking)
+    - Cloudinary signed upload presets & secure asset management
 19. **Lakdhanavi Corporate Web Project** (10 questions):
-    - Next.js App Router server components & dynamic metadata
-    - Resume/CV upload validation & path traversal prevention
-    - Tiptap rich text XSS sanitization via DOMPurify
+    - Next.js 16 App Router server components & dynamic metadata
+    - Leaflet interactive plant map SSR crash fix via dynamic import
+    - Honeypot field spam protection & instant Nodemailer alert triggers
     - Lenis & GSAP animation optimization with dynamic imports
     - Dynamic XML sitemap & robots.txt generation
 

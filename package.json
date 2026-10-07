@@ -1,0 +1,27 @@
+{
+  "name": "q-a-interview-prep",
+  "version": "1.0.0",
+  "description": "Full Stack Web Developer Interview Preparation Platform — RangdhanuIT | বাংলা + English Q&A",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve .",
+    "validate": "node --check app.js && node -e \"const fs=require('fs'); fs.readdirSync('data').forEach(f => require('child_process').execSync('node --check data/' + f)); console.log('All JS validated successfully!')\"",
+    "build": "npm run validate"
+  },
+  "keywords": [
+    "interview-prep",
+    "fullstack",
+    "react",
+    "nextjs",
+    "nodejs",
+    "express",
+    "prisma",
+    "mongodb",
+    "dokani-pos",
+    "pttabd-lms",
+    "lakdhanavi"
+  ],
+  "author": "Jahid Hasan",
+  "license": "MIT"
+}
