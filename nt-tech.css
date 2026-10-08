@@ -175,6 +175,39 @@ a {
   overflow-y: auto;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+/* Thin low-opacity scrollbar for desktop & modern browsers */
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+  transition: background 0.2s ease;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+[data-theme='light'] .sidebar {
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+}
+
+[data-theme='light'] .sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme='light'] .sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .brand {
@@ -310,19 +343,28 @@ a {
   flex: 1;
 }
 
+.cat-nav-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 4px;
+}
+
 .cat-nav-btn {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 11px 14px;
+  padding: 10px 12px;
   border-radius: var(--radius-md);
   background: transparent;
   border: 1px solid transparent;
   color: var(--text-muted);
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   text-align: left;
   transition: all 0.2s ease;
+  cursor: pointer;
+  user-select: none;
 }
 
 .cat-nav-btn:hover {
@@ -348,6 +390,12 @@ a {
   font-size: 1.15rem;
 }
 
+.cat-nav-btn-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .cat-nav-badge {
   font-size: 0.72rem;
   padding: 2px 7px;
@@ -361,6 +409,115 @@ a {
   background: var(--accent);
   color: #0b0d17;
   font-weight: 700;
+}
+
+/* Chevron expand indicator */
+.cat-expand-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 0.72rem;
+  color: var(--text-subtle);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+}
+
+.cat-nav-group.expanded .cat-expand-chevron {
+  transform: rotate(90deg);
+  color: var(--accent);
+}
+
+/* Nested topics list */
+.cat-topics-list {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 10px;
+  margin: 4px 0 6px 16px;
+  border-left: 2px solid rgba(255, 255, 255, 0.08);
+}
+
+.cat-nav-group.expanded .cat-topics-list {
+  display: flex;
+  animation: slideDownTopics 0.25s ease-out;
+}
+
+@keyframes slideDownTopics {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cat-topic-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-subtle);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: left;
+  transition: all 0.18s ease;
+  cursor: pointer;
+  width: 100%;
+}
+
+.cat-topic-btn:hover {
+  background: var(--panel-hover);
+  color: var(--text);
+  padding-left: 13px;
+}
+
+.cat-topic-btn.active {
+  background: rgba(142, 97, 255, 0.14);
+  border-color: rgba(142, 97, 255, 0.35);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.topic-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topic-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-subtle);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.cat-topic-btn:hover .topic-dot {
+  background: var(--text);
+}
+
+.cat-topic-btn.active .topic-dot {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+.topic-count {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--text-subtle);
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.cat-topic-btn.active .topic-count {
+  color: var(--accent);
+  background: rgba(142, 97, 255, 0.2);
 }
 
 .sidebar-footer {

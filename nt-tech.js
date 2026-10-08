@@ -16,7 +16,8 @@
     hideDone: false,
     searchQuery: '',
     mastered: new Set(JSON.parse(localStorage.getItem('nt_mastered_ids') || '[]')),
-    theme: localStorage.getItem('nt_theme') || 'dark'
+    theme: localStorage.getItem('nt_theme') || 'dark',
+    expandedCats: new Set(['frontend'])
   };
 
   // --- DOM Elements ---
@@ -164,23 +165,103 @@
       const data = getCategoryData(catId);
       if (!data) return;
       const count = getAllQuestions(catId).length;
+      const isExpanded = STATE.expandedCats.has(catId);
+      const isActiveCat = catId === STATE.currentCat;
 
-      const btn = document.createElement('button');
-      btn.className = `cat-nav-btn ${catId === STATE.currentCat ? 'active' : ''}`;
-      btn.dataset.cat = catId;
-      btn.innerHTML = `
+      const group = document.createElement('div');
+      group.className = `cat-nav-group ${isExpanded ? 'expanded' : ''}`;
+      group.dataset.cat = catId;
+
+      // Category Header Button
+      const headerBtn = document.createElement('button');
+      headerBtn.className = `cat-nav-btn ${isActiveCat ? 'active' : ''}`;
+      headerBtn.dataset.cat = catId;
+      headerBtn.innerHTML = `
         <div class="cat-nav-btn-left">
           <span class="cat-nav-btn-icon">${data.icon}</span>
           <span>${data.title}</span>
         </div>
-        <span class="cat-nav-badge">${count}</span>
+        <div class="cat-nav-btn-right">
+          <span class="cat-nav-badge">${count}</span>
+          <span class="cat-expand-chevron">▶</span>
+        </div>
       `;
-      btn.addEventListener('click', () => {
-        loadCategory(catId);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      headerBtn.addEventListener('click', () => {
+        if (STATE.currentCat !== catId) {
+          STATE.expandedCats.add(catId);
+          loadCategory(catId);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          // Toggle collapse on active category
+          if (STATE.expandedCats.has(catId)) {
+            STATE.expandedCats.delete(catId);
+            group.classList.remove('expanded');
+          } else {
+            STATE.expandedCats.add(catId);
+            group.classList.add('expanded');
+          }
+        }
+      });
+      group.appendChild(headerBtn);
+
+      // Nested Topics Container
+      const topicsList = document.createElement('div');
+      topicsList.className = 'cat-topics-list';
+
+      // 'All Topics' item
+      const allTopicBtn = document.createElement('button');
+      allTopicBtn.className = `cat-topic-btn ${isActiveCat && STATE.currentTopic === 'all' ? 'active' : ''}`;
+      allTopicBtn.dataset.cat = catId;
+      allTopicBtn.dataset.topic = 'all';
+      allTopicBtn.innerHTML = `
+        <div class="topic-btn-left">
+          <span class="topic-dot"></span>
+          <span class="topic-name">🌟 সব টপিক</span>
+        </div>
+        <span class="topic-count">${count}</span>
+      `;
+      allTopicBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (STATE.currentCat !== catId) {
+          STATE.expandedCats.add(catId);
+          loadCategory(catId);
+        }
+        selectTopicHandler('all');
         if (window.innerWidth <= 900) el.sidebar.classList.remove('mobile-open');
       });
-      el.catNav.appendChild(btn);
+      topicsList.appendChild(allTopicBtn);
+
+      // Individual topics
+      (data.topics || []).forEach((t) => {
+        const tCount = (t.items || []).length;
+        const isTopicActive = isActiveCat && STATE.currentTopic === t.id;
+
+        const topicBtn = document.createElement('button');
+        topicBtn.className = `cat-topic-btn ${isTopicActive ? 'active' : ''}`;
+        topicBtn.dataset.cat = catId;
+        topicBtn.dataset.topic = t.id;
+        topicBtn.innerHTML = `
+          <div class="topic-btn-left">
+            <span class="topic-dot"></span>
+            <span class="topic-name">${escapeHtml(t.name)}</span>
+          </div>
+          <span class="topic-count">${tCount}</span>
+        `;
+        topicBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (STATE.currentCat !== catId) {
+            STATE.expandedCats.add(catId);
+            loadCategory(catId);
+          }
+          selectTopicHandler(t.id);
+          if (window.innerWidth <= 900) el.sidebar.classList.remove('mobile-open');
+        });
+        topicsList.appendChild(topicBtn);
+      });
+
+      group.appendChild(topicsList);
+      el.catNav.appendChild(group);
     });
   }
 
@@ -202,12 +283,42 @@
   }
 
   function updateActiveCategoryNavs(catId) {
-    el.catNav.querySelectorAll('.cat-nav-btn').forEach((b) => {
-      b.classList.toggle('active', b.dataset.cat === catId);
+    STATE.expandedCats.add(catId);
+
+    el.catNav.querySelectorAll('.cat-nav-group').forEach((g) => {
+      const isThisCat = g.dataset.cat === catId;
+      const isExpanded = STATE.expandedCats.has(g.dataset.cat);
+      g.classList.toggle('expanded', isExpanded);
+
+      const headerBtn = g.querySelector('.cat-nav-btn');
+      if (headerBtn) headerBtn.classList.toggle('active', isThisCat);
+
+      g.querySelectorAll('.cat-topic-btn').forEach((tb) => {
+        const matches = isThisCat && tb.dataset.topic === STATE.currentTopic;
+        tb.classList.toggle('active', matches);
+      });
     });
+
     el.mobileCatChipsTrack.querySelectorAll('.m-cat-chip').forEach((c) => {
       c.classList.toggle('active', c.dataset.cat === catId);
     });
+  }
+
+  function selectTopicHandler(topicId) {
+    STATE.currentTopic = topicId;
+    updateActiveTopicChip(topicId);
+    updateActiveCategoryNavs(STATE.currentCat);
+    renderCards();
+    updateLevelCounts();
+
+    if (topicId !== 'all') {
+      const targetEl = document.getElementById(`topic-group-${topicId}`);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // --- Render Topic Chips ---
@@ -218,11 +329,9 @@
     const allChip = document.createElement('button');
     allChip.className = `topic-chip ${STATE.currentTopic === 'all' ? 'active' : ''}`;
     allChip.textContent = '🌟 সব টপিক';
+    allChip.dataset.topic = 'all';
     allChip.addEventListener('click', () => {
-      STATE.currentTopic = 'all';
-      updateActiveTopicChip(allChip);
-      renderCards();
-      updateLevelCounts();
+      selectTopicHandler('all');
     });
     el.topicsChipsTrack.appendChild(allChip);
 
@@ -230,19 +339,18 @@
       const chip = document.createElement('button');
       chip.className = `topic-chip ${STATE.currentTopic === t.id ? 'active' : ''}`;
       chip.textContent = t.name;
+      chip.dataset.topic = t.id;
       chip.addEventListener('click', () => {
-        STATE.currentTopic = t.id;
-        updateActiveTopicChip(chip);
-        renderCards();
-        updateLevelCounts();
+        selectTopicHandler(t.id);
       });
       el.topicsChipsTrack.appendChild(chip);
     });
   }
 
-  function updateActiveTopicChip(activeEl) {
-    el.topicsChipsTrack.querySelectorAll('.topic-chip').forEach((c) => c.classList.remove('active'));
-    activeEl.classList.add('active');
+  function updateActiveTopicChip(topicId) {
+    el.topicsChipsTrack.querySelectorAll('.topic-chip').forEach((c) => {
+      c.classList.toggle('active', c.dataset.topic === topicId);
+    });
   }
 
   // --- Update Level Badge Counts ---
@@ -826,14 +934,7 @@
     },
     selectTopic: (topicId) => {
       closeBottomSheet();
-      STATE.currentTopic = topicId;
-      const chip = Array.from(el.topicsChipsTrack.children).find((c) =>
-        topicId === 'all' ? c.textContent.includes('সব টপিক') : c.textContent.includes(topicId)
-      );
-      if (chip) updateActiveTopicChip(chip);
-      renderCards();
-      updateLevelCounts();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      selectTopicHandler(topicId);
     },
     selectLevel: (lvlId) => {
       closeBottomSheet();
