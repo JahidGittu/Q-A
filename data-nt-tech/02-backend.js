@@ -295,6 +295,53 @@ window.NT_DATA.backend = {
           tip: "এই ফুল-স্ট্যাক লিনাক্স ডেভঅপ্স উত্তর প্রমাণ করে যে তুমি একটি প্রজেক্ট শুরু থেকে প্রোডাকশন ডেলিভারি পর্যন্ত একাই হ্যান্ডেল করতে সক্ষম।"
         }
       ]
+    },
+    {
+      id: "marketplaces-business-apps",
+      name: "Online Marketplaces, Business Apps & Integrations",
+      desc: "Multi-Vendor Marketplace Architecture, Platform Commission & Payouts, Secure Webhooks, Audit Logs, Business Dashboards",
+      items: [
+        {
+          lvl: "lvl1",
+          q: "Online Marketplace-এ মাল্টি-ভেন্ডর (Multi-Vendor) সিস্টেমের ক্ষেত্রে ডেটাবেজ ও পেমেন্ট ফ্লো কীভাবে ডিজাইন করা হয়?",
+          m: "একটি অনলাইন মার্কেটপ্লেসে কাস্টমার একটি অর্ডারে একাধিক ভেন্ডরের প্রোডাক্ট কিনতে পারে। আর্কিটেকচার ডিজাইন: (১) **Split Order Data Model:** মূল `Order`-এর অধীনে প্রতিটি ভেন্ডরের জন্য আলাদা আলাদা `SubOrder` বা `VendorOrderItem` থাকে যাতে ভেন্ডররা শুধুমাত্র তাদের নিজস্ব আইটেম দেখতে এবং ডেলিভারি স্ট্যাটাস আপডেট করতে পারে। (২) **Platform Commission & Split Payouts:** কাস্টমার যখন পেমেন্ট গেটওয়েতে টাকা পরিশোধ করে, পুরো টাকাটি প্ল্যাটফর্মের এসক্রো (Escrow) একাউন্টে জমা হয়। প্ল্যাটফর্ম নিজস্ব কমিশন (যেমন ১০%) কেটে রেখে অবশিষ্ট ৯০% টাকা ভেন্ডরের `VendorWallet` বা ব্যালেন্সে ক্রেডিট করে। (৩) নির্দিষ্ট সাইকেল পর পর (যেমন প্রতি সপ্তাহে) ভেন্ডর ব্যাংক বা বিকাশে পে-আউট রিকোয়েস্ট করতে পারে।",
+          b: "মার্কেটপ্লেসে একজন ক্রেতার একটি অর্ডারে একাধিক বিক্রেতার পণ্য থাকতে পারে। তাই মূল অর্ডারের ভেতরে প্রতিটি বিক্রেতার জন্য আলাদা সাব-অর্ডার তৈরি করা হয়। পেমেন্ট পাওয়ার পর প্ল্যাটফর্ম নিজস্ব কমিশন কেটে রেখে বাকি টাকা বিক্রেতার ওয়ালেটে জমা করে এবং পরবর্তীতে পে-আউট করা হয়।",
+          e: "In multi-vendor marketplace architectures, a single customer checkout generates partitioned Sub-Orders scoped per vendor so merchants manage only their respective line items. Financially, customer payments land in the platform's escrow balance. An automated ledger deducts platform take-rates (commissions) and credits the net balance into each vendor's earnings ledger for scheduled payouts.",
+          code: "model SubOrder {\n  id          String      @id @default(uuid())\n  orderId     String\n  vendorId    String\n  subtotal    Decimal\n  platformFee Decimal\n  vendorNet   Decimal\n  status      OrderStatus // PROCESSING, SHIPPED, DELIVERED\n}"
+        },
+        {
+          lvl: "lvl2",
+          q: "Third-Party Webhooks (যেমন: Stripe, bKash, SendGrid) রিসিভ করার সময় সিকিউরিটি ও আইডেমপোটেন্সি (Idempotency) কীভাবে নিশ্চিত করবে?",
+          m: "ওয়েবহুক হলো পাবলিক ইন্টারনেট থেকে আমাদের সার্ভারে আসা রিকোয়েস্ট—তাই কঠোর ৩টি নিরাপত্তা নিশ্চিত করা বাধ্যতামূলক: (১) **HMAC Signature Verification:** রিকোয়েস্ট হেডারের সিগনেচার (যেমন `x-webhook-signature`) আমাদের সিক্রেট কি দিয়ে ভেরিফাই করব যাতে নিশ্চিত হওয়া যায় রিকোয়েস্টটি আসলেই পেমেন্ট গেটওয়ে থেকেই এসেছে। (২) **Idempotency Guard:** পেমেন্ট গেটওয়ে নেটওয়ার্ক সমস্যার কারণে একই ওয়েবহুক ২–৩ বার পাঠাতে পারে। আমরা ইভেন্ট আইডি (Event ID) ডাটাবেজে ট্র্যাক করব; যদি ওই ইভেন্ট পূর্বে প্রসেস হয়ে থাকে, তবে পুনরায় অর্ডার আপডেট বা ওয়ালেট ক্রেডিট না করে সাথে সাথে `200 OK` রিটার্ন করব। (৩) **Immediate 200 OK & Async Queue:** ভারী কাজ ব্যাকগ্রাউন্ড কিউতে (BullMQ) পাঠিয়ে সাথে সাথে গেটওয়েকে HTTP 200 রেসপন্স পাঠাব যাতে টাইমআউট না হয়।",
+          b: "ওয়েবহুক সুরক্ষায় প্রথমে সিক্রেট কি দিয়ে সিগনেচার ভেরিফাই করতে হয় যাতে কোনো হ্যাকার ভুয়া রিকোয়েস্ট পাঠাতে না পারে। গেটওয়ে একই ইভেন্ট একাধিকবার পাঠালে ডুপ্লিকেট পেমেন্ট এড়াতে ইভেন্ট আইডি দিয়ে আইডেমপোটেন্ট চেক করতে হয় এবং টাইমআউট এড়াতে সাথে সাথে ২০০ রেসপন্স দিয়ে ব্যাকগ্রাউন্ডে কাজ সম্পন্ন করা হয়।",
+          e: "Securing third-party webhooks mandates 3 safeguards: first, cryptographic HMAC signature verification over the raw request payload using shared provider secrets; second, strict idempotency enforcement by persisting webhook event IDs to prevent duplicate processing if retries occur; third, immediate HTTP 200 acknowledgments while delegating heavy database or fulfillment tasks to background job queues.",
+          code: "export async function handleWebhook(req: Request) {\n  const signature = req.headers.get('x-signature');\n  const rawBody = await req.text();\n  if (!verifyHmac(rawBody, signature)) return new Response('Invalid signature', { status: 401 });\n  const event = JSON.parse(rawBody);\n  const alreadyProcessed = await db.webhookEvents.findUnique({ where: { id: event.id } });\n  if (alreadyProcessed) return new Response('Already processed', { status: 200 });\n  await processEventAsync(event);\n  return new Response('OK', { status: 200 });\n}"
+        },
+        {
+          lvl: "lvl3",
+          q: "Internal Business Applications-এ গুরুত্বপূর্ণ ডেটা পরিবর্তন ট্র্যাক করতে 'Audit Log Architecture' কীভাবে ডিজাইন করবে?",
+          m: "অভ্যন্তরীণ বিজনেস অ্যাপ্লিকেশনে (যেমন ইআরপি বা এডমিন প্যানেল) কোনো ইউজার কখন কোনো ডাটা পরিবর্তন করল, ইনভয়েস ডিলিট করল বা মূল্য পরিবর্তন করল তা জানা অত্যাবশ্যক। আমরা একটি অপরিবর্তনশীল (Immutable) `audit_logs` টেবিল বানাব: (১) কে পরিবর্তন করেছে (`userId`, `userRole`), (২) কোন মডিউলে (`entity`: 'PRODUCT', `entityId`: '123'), (৩) কোন অ্যাকশন (`action`: 'UPDATE_PRICE'), (৪) পরিবর্তনের আগের ও পরের ডেটা (`oldValue` ও `newValue` PostgreSQL `JSONB` ফিল্ডে), (৫) ক্লায়েন্টের আইপি এড্রেস ও টাইমস্ট্যাম্প। এই টেবিলে কোনো `UPDATE` বা `DELETE` পারমিশন দেওয়া থাকে না—শুধুমাত্র `INSERT` করা যায়, ফলে এটি ১০০% অডিট-প্রুফ থাকে।",
+          b: "বিজনেস অ্যাপে অডিট লগ তৈরি করতে একটি আলাদা অপরিবর্তনশীল টেবিল ব্যবহার করা হয়। ব্যবহারকারী কখন কী পরিবর্তন করেছে তা আগের এবং পরের ভ্যালু সহ জেসন (JSONB) ফরম্যাটে স্বয়ংক্রিয়ভাবে রেকর্ড করা হয়। এই টেবিল থেকে কোনো রেকর্ড মোছা যায় না, ফলে প্রতিষ্ঠানের সকল কাজের স্বচ্ছ ইতিহাস সংরক্ষিত থাকে।",
+          e: "Enterprise internal applications mandate immutable audit trails. An audit_logs table captures the actor (userId, role), target entity (entityName, entityId), action verb (CREATE, UPDATE, DELETE), snapshot diffs (oldValues and newValues stored as PostgreSQL JSONB), source IP, and timestamp. Database privileges on this table restrict all UPDATE and DELETE capabilities, preserving a forensically unalterable ledger.",
+          code: "model AuditLog {\n  id        String   @id @default(uuid())\n  userId    String\n  userEmail String\n  action    String   // e.g. PRICE_CHANGE, REFUND_ISSUED\n  entity    String   // INVOICE, PRODUCT\n  entityId  String\n  oldData   Json?\n  newData   Json?\n  ipAddress String?\n  createdAt DateTime @default(now())\n}"
+        },
+        {
+          lvl: "situation",
+          q: "মার্কেটপ্লেসে একটি কাস্টমার অর্ডার বাতিল করেছে কিন্তু ভেন্ডর ইতিমধ্যে প্রোডাক্ট ডেলিভারি প্রসেস শুরু করে দিয়েছে। রেস কন্ডিশন ও আর্থিক ক্ষতি এড়াতে কীভাবে স্টেট মেশিন ডিজাইন করবে?",
+          m: "এটি একটি ক্রিটিক্যাল স্টেট ট্রানজিশন সমস্যা! সমাধান: **Strict Finite State Machine (FSM)**। (১) অর্ডারের প্রতিটি স্ট্যাটাস শুধুমাত্র অনুমোদিত পরবর্তী স্ট্যাটাসেই যেতে পারবে: `PLACED ➔ CONFIRMED ➔ SHIPPED ➔ DELIVERED`। (২) কাস্টমার শুধুমাত্র `PLACED` বা `CONFIRMED` থাকা অবস্থায় ১ ক্লিকে অটো-ক্যানসেল করতে পারবে। (৩) ভেন্ডর যখন স্ট্যাটাস `SHIPPED` করে দেয়, তখন কাস্টমারের 'Cancel' বাটন ডিজেবল হয়ে 'Request Return/Cancellation' হয়ে যাবে—যা ভেন্ডর বা এডমিনের অনুমোদনের জন্য পেন্ডিং থাকবে। (৪) রিফান্ড প্রসেস করার আগে ডাটাবেজে চেক করা হবে প্রোডাক্ট ডেলিভারি ট্র্যাকিং আইডি জেনারেট হয়েছে কিনা, যাতে প্রোডাক্ট ও টাকা উভয়েই একসাথে না খোয়া যায়।",
+          b: "অর্ডার বাতিল ও ডেলিভারির মধ্যে বিরোধ ঠেকাতে আমরা স্টেট মেশিন ব্যবহার করি। পণ্য পাঠানো (SHIPPED) হওয়ার পর কাস্টমার সরাসরি অর্ডার বাতিল করতে পারে না, বরং রিটার্ন রিকোয়েস্ট পাঠায়। ডাটাবেজ ট্রানজেকশনের মাধ্যমে ডেলিভারি ও রিফান্ড নিশ্চিত করে আর্থিক ক্ষতি রোধ করা হয়।",
+          e: "This is solved via a deterministic Finite State Machine (FSM). Orders transition strictly along valid status graphs: PLACED -> PROCESSING -> SHIPPED -> DELIVERED. Customer-initiated direct cancellations are permitted strictly before the SHIPPED threshold. Once a merchant transitions the state to SHIPPED, direct cancellations lock out, redirecting the user to a formal Return Request requiring merchant acknowledgment before initiating any automated refunds.",
+          tip: "Finite State Machine (FSM) আর্কিটেকচার জটিল অর্ডার ও পেমেন্ট ম্যানেজমেন্টের স্বর্ণমান।"
+        },
+        {
+          lvl: "realworld",
+          q: "Dokani POS ও PTTABD-তে কাস্টমারদের জন্য স্বয়ংক্রিয় এসএমএস, ইনভয়েস ইমেইল ও পেমেন্ট কনফার্মেশন কীভাবে ব্যাকগ্রাউন্ডে নন-ব্লকিংভাবে পরিচালনা করেছিলে?",
+          m: "সেলস চেকআউট এপিআইতে যদি একই সাথে এসএমএস গেটওয়ে কল ও পিডিএফ ইমেইল পাঠানো হয়, তবে এপিআই রেসপন্স হতে ৩–৪ সেকেন্ড সময় লাগবে এবং এসএমএস প্রোভাইডারের সার্ভার ডাউন থাকলে পুরো চেকআউট আটকে যাবে। সমাধান: (১) চেকআউট কন্ট্রোলারে শুধুমাত্র ডাটাবেজ ট্রানজেকশন সফল হলে একটি ইভেন্ট পুশ করতাম `eventEmitter.emit('invoice.created', invoice)`। (২) ব্যাকগ্রাউন্ড ওয়ার্কার বা কিউ এই ইভেন্টটি পিক করে থার্ড-পার্টি বাল্ক এসএমএস এপিআই (Greenweb / Elitbuzz) এবং Nodemailer দিয়ে ইমেইল পাঠাত। (৩) কোনো কারণে এসএমএস ফেইল করলেও ক্যাশিয়ারের কাউন্টারে বিক্রির এপিআই মাত্র ৬০ মিলিসেকেন্ডে সম্পন্ন হয়ে প্রিন্ট বেরিয়ে যেত।",
+          b: "দোকানি এবং পিটিটিএবিডিতে এসএমএস ও ইমেইল পাঠানোর কাজটি ব্যাকগ্রাউন্ড ইভেন্টের মাধ্যমে করা হয়েছিল। ফলে মূল বিক্রি বা চেকআউট মাত্র ৬০ মিলিসেকেন্ডে শেষ হয়ে মেমো প্রিন্ট হতো এবং ব্যাকগ্রাউন্ড প্রসেস স্বাধীনভাবে এসএমএস ও ইমেইল ডেলিভারি নিশ্চিত করত।",
+          e: "In Dokani and PTTABD, customer notifications were completely decoupled from checkout HTTP cycles using Node.js event emitters and worker tasks. Once database transactions committed, the handler emitted an 'invoice.completed' event and returned immediate HTTP 200 to the cashier (sub-60ms latency). Asynchronous worker subscribers consumed the event to render PDF vouchers and invoke third-party SMS/email gateways without risking checkout delays.",
+          tip: "Decoupled Event-Driven Notification আর্কিটেকচারের অভিজ্ঞতা যেকোনো সিনিয়র বা লিড ফুল-স্ট্যাক পজিশনে অপরিহার্য।"
+        }
+      ]
     }
   ]
 };

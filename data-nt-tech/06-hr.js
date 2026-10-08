@@ -193,6 +193,53 @@ window.NT_DATA.hr = {
           tip: "কোম্পানির বাজেট রেঞ্জ জানতে চেয়ে ওপেন-এন্ডেড রাখা সবচেয়ে শক্তিশালী নেগোসিয়েশন কৌশল।"
         }
       ]
+    },
+    {
+      id: "ai-workflow-code-review",
+      name: "AI Coding Tools, Code Review & Blocker Escalation",
+      desc: "Cursor / Claude Code Workflows, Verifying AI Output, PR Code Review Standards, Investigating Bugs Independently",
+      items: [
+        {
+          lvl: "lvl1",
+          q: "তুমি তোমার দৈনন্দিন সফটওয়্যার ডেভেলপমেন্টে AI টুলস (Cursor, Claude, Copilot, Codex) কীভাবে ব্যবহার করো?",
+          m: "আমি AI টুলসকে একজন সুপারফাস্ট 'Pair Programmer' হিসেবে ব্যবহার করি—যা আমার ডেভেলপমেন্ট গতি ৩–৪ গুণ বাড়িয়ে দেয়। মূলত যেসব কাজে ব্যবহার করি: (১) বয়লারপ্লেট কোড জেনারেশন (যেমন: Prisma মডেল, Zod স্কিমা, TypeScript ইন্টারফেস ও টাইপস), (২) রেগুলার এক্সপ্রেশন (Regex) ও জটিল SQL কোয়েরি ড্রাফট করা, (৩) ইউনিট টেস্ট কেসের প্রাথমিক ড্রাফট লেখা, (৪) জটিল অ্যালগরিদম বা আর্কিটেকচারাল প্যাটার্নের বিভিন্ন অল্টারনেটিভ অপশন দ্রুত এক্সপ্লোর করা। তবে আমি কখনো AI-কে মূল বিজনেস ডিসিশন বা সিকিউরিটি আর্কিটেকচার ছেড়ে দিই না।",
+          b: "আমি এআই টুলসকে একজন সহযোগী কোডার হিসেবে ব্যবহার করি যা টাইপস্ক্রিপ্ট ইন্টারফেস, ডেটাবেজ স্কিমা এবং ইউনিট টেস্টের মতো রিপিটেটিভ কাজগুলো দ্রুত তৈরি করতে সাহায্য করে। তবে মূল বিজনেস লজিক এবং আর্কিটেকচারাল সিদ্ধান্ত আমি নিজে গ্রহণ করি।",
+          e: "I leverage AI coding assistants (such as Cursor, Claude Code, and GitHub Copilot) as rapid pair-programming accelerators. Key applications include scaffolding boilerplate Prisma schemas, generating strict TypeScript interfaces, drafting unit test suites, and exploring alternative SQL optimization strategies. Crucially, high-level system design and business domain decisions remain entirely under my manual control.",
+          tip: "ওয়ার্ল্ড কর্প ডিজিটাল বা আধুনিক রিমোট কোম্পানিগুলো AI ব্যবহারকে সাধুবাদ জানায়, তবে দেখতে চায় তুমি টুলটির মাস্টার—গোলাম নও।"
+        },
+        {
+          lvl: "lvl2",
+          q: "AI জেনারেটেড কোডকে অন্ধভাবে বিশ্বাস না করে তুমি কীভাবে তা পুঙ্খানুপুঙ্খভাবে ভেরিফাই ও টেস্ট করো?",
+          m: "AI কোড প্রায়শই পুরোনো লাইব্রেরির মেথড উদ্ভাবন করে (Hallucination) অথবা সূক্ষ্ম সিকিউরিটি বাগ ফেলে রাখে। আমার ভেরিফিকেশন প্রসেস: (১) **Strict TypeScript Verification:** কোড নেওয়ার পর সাথে সাথে `tsc --noEmit` চালাই; AI অনেক সময় অলসভাবে `any` টাইপ ব্যবহার করে বা অস্তিত্বহীন প্রপার্টি দেয়। (২) **Security & Multi-Tenant Audit:** ডাটাবেজ কোয়েরিতে `tenantId` ফিল্টার বাদ পড়েছে কিনা, N+1 লুপ তৈরি হয়েছে কিনা এবং SQL ইনজেকশনের ঝুঁকি আছে কিনা নিজে লাইন-বাই-লাইন রিভিউ করি। (৩) **Edge Cases & Null Checks:** শূন্য স্টক, নাল ডাটা, এবং নেটওয়ার্ক টাইমআউটের মতো কঠিন এজ কেসগুলো ম্যানুয়ালি টেস্ট করি। (৪) লোকাল ব্রাউজারে চালিয়ে এবং টেস্ট স্যুট পাস করিয়ে তবেই গিট কমিট করি।",
+          b: "এআই কোড অন্ধভাবে ব্যবহার না করে প্রথমে টাইপস্ক্রিপ্ট কম্পাইলার দিয়ে টাইপ সুরক্ষা নিশ্চিত করি। এরপর সিকিউরিটি ও মাল্টি-টেন্যান্ট ফিল্টারগুলো লাইন-বাই-লাইন অডিট করি। নাল ভ্যালু ও এরর হ্যান্ডলিং নিজে পরীক্ষা করে ব্রাউজারে টেস্ট চালানোর পরই কোড কমিট করি।",
+          e: "I never trust AI-generated code blindly. My verification protocol spans: running strict TypeScript compiler checks (tsc --noEmit) to catch hallucinated APIs or lazy 'any' typings; conducting manual line-by-line security audits to guarantee tenant-isolation filters (tenantId) and index usage are preserved; verifying edge cases (null boundaries, async race conditions); and executing automated Jest/Playwright tests in a local environment prior to committing.",
+          tip: "এই উত্তরটি সরাসরি World Corp Digital-এর নিয়োগ বিজ্ঞপ্তির সবচেয়ে গুরুত্বপূর্ণ ফিল্টার ক্রাইটেরিয়াকে সন্তুষ্ট করে।"
+        },
+        {
+          lvl: "lvl3",
+          q: "একজন Lead Full-Stack Developer-এর সাথে কাজ করার সময় Pull Request (PR) রিভিউ ও কোড রিভিউতে কী কী বিষয়ে সবচেয়ে বেশি নজর দাও?",
+          m: "কোড রিভিউ হলো কোডবেসের মান ও স্থায়িত্ব বজায় রাখার প্রধান দুর্গ। আমি এবং আমার টিম পিআর রিভিউতে ৫টি স্তম্ভ দেখি: (১) **Business Logic & Correctness:** পিআরটি কি টিকিট বা স্পেসিফিকেশনের সমস্যাটি আসলেই সমাধান করছে? কোনো আনহ্যান্ডেল্ড রেস কন্ডিশন বা এজ কেস আছে কি? (২) **Type Safety & Maintainability:** কোনো `any` টাইপ আছে কিনা, কোড পরিষ্কার ও সেলফ-ডকুমেন্টিং কিনা। (৩) **Database & Performance Impact:** কোনো আন-ইনডেক্সড কুয়েরি বা N+1 কোয়েরি আছে কিনা যা প্রোডাকশন ডাউন করতে পারে। (৪) **Security & Secrets:** কোনো API Key বা পাসওয়ার্ড ভুলবশত কোডে রয়ে গেছে কিনা। (৫) **Automated Test Coverage:** নতুন ফিচারের সাথে যথাযথ ইউনিট বা ইন্টিগ্রেশন টেস্ট যুক্ত করা হয়েছে কিনা।",
+          b: "কোড রিভিউতে আমরা কোডের কার্যকারিতা, টাইপ সেফটি, ডাটাবেজ পারফরম্যান্স এবং সিকিউরিটি পুঙ্খানুপুঙ্খভাবে যাচাই করি। কোনো সিক্রেট কি বা স্লো কুয়েরি আছে কিনা এবং প্রয়োজনীয় অটোমেটেড টেস্ট যুক্ত করা হয়েছে কিনা তা নিশ্চিত করে সম্মানজনকভাবে গঠনমূলক ফিডব্যাক দেওয়া হয়।",
+          e: "When reviewing Pull Requests alongside a Lead Engineer, I focus on five pillars: functional correctness and edge-case handling against the feature spec; strict type safety and modular maintainability; database query efficiency (checking for N+1 traps and unindexed scans); security hygiene (ensuring zero hardcoded credentials and valid sanitization); and verifying that automated test suites adequately cover modified execution paths.",
+          tip: "পিআর রিভিউতে 'Constructive & Respectful Feedback'-এর কথা উল্লেখ করা সিনিয়র মানসিকতার পরিচয়।"
+        },
+        {
+          lvl: "situation",
+          q: "কোনো জটিল বাগ বা ইন্টিগ্রেশন ইস্যুতে তুমি সম্পূর্ণ আটকে গেছো (Completely Stuck)। টিম লিডকে ডাকার আগে তুমি নিজে নিজে কোন কোন সুনির্দিষ্ট পদক্ষেপ নাও?",
+          m: "সরাসরি টিম লিডকে না ডেকে আমি একটি সিস্টেমেটিক ৫-ধাপের ইনভেস্টিগেশন চালাই: (১) **Minimal Reproduction:** লোকাল এনভায়রনমেন্টে সমস্যাটি বিচ্ছিন্ন করি এবং একটি ছোট স্ক্রিপ্ট বা টেস্ট কেস বানিয়ে ১০০% সময় বাগটি রিপ্রোডিউস করি। (২) **Telemetry & Logs:** ব্রাউজারের Network Tab, Server JSON Logs, এবং ডাটাবেজের `pg_stat_activity` চেক করে ঠিক কোন লেয়ারে ফেইল হচ্ছে (HTTP, Payload, DB Connection) তা নিশ্চিত হই। (৩) **Git Bisect:** `git bisect` চালিয়ে দেখি কোন নির্দিষ্ট কমিটে সমস্যাটি প্রথম শুরু হয়েছিল। (৪) **Official Docs & GitHub Issues:** লাইব্রেরির অফিশিয়াল চেঞ্জলগ এবং গিটহাবের ওপেন/ক্লোজড ইস্যু চেক করি লাইব্রেরির কোনো অভ্যন্তরীণ বাগ আছে কিনা। (৫) যদি একান্তই সমাধান না হয়, তখন লিডকে জানানোর সময় পরিষ্কার ৩টি তথ্য দিই: সমস্যাটি কী, আমি নিজে কী কী ট্রাই করেছি ও রেজাল্ট কী এসেছে, এবং আমার হাইপোথিসিস কী।",
+          b: "বাগ বা সমস্যায় আটকে গেলে আগে নিজে নিজে সমস্যাটি লোকালি রিপ্রোডিউস করি, সার্ভার ও ডাটাবেজ লগ খতিয়ে দেখি এবং গিট হিস্ট্রি চেক করি। সমাধান না হলে টিম লিডকে জানানোর সময় আমি যা যা ট্রাই করেছি তার সম্পূর্ণ সারসংক্ষেপ সহ পেশাদারভাবে মেসেজ দিই যাতে লিডের সময় নষ্ট না হয়।",
+          e: "Before escalating blockers, I execute a structured investigative routine: establish a deterministic minimal reproduction in an isolated test; inspect runtime telemetry across network payloads, application logs, and database queries; execute git bisect to identify the exact regression commit; and consult official release notes and GitHub issue threads. When escalation is necessary, I present a concise brief: the exact symptom, steps already attempted with observed outcomes, and current diagnostic hypotheses.",
+          tip: "এই উত্তরটি প্রমাণ করে যে তুমি একজন স্বাবলম্বী (Self-reliant) ইঞ্জিনিয়ার যে অন্যের সময় নষ্ট করে না।"
+        },
+        {
+          lvl: "realworld",
+          q: "রিমোট টিমে (যেমন: ফিলিপাইন ও বাংলাদেশ টাইমজোনে) কাজ করার সময় Blocker বা ঝুঁকি কীভাবে আর্লি ও ক্লিয়ারলি কমিউনিকেট করতে হয়?",
+          m: "রিমোট কালচারে 'Silent Struggle' হলো সবচেয়ে বড় অপরাধ। আমার কমিউনিকেশন নিয়ম: (১) কোনো টাস্কে ২ ঘণ্টার বেশি আনপ্রোডাক্টিভ আটকে থাকলে সাথে সাথে স্ল্যাক বা টিম চ্যানেলে আপডেট দিই। (২) মেসেজটি সব সময় স্ট্রাকচার্ড আকারে লিখি: **[Context]**, **[What I Discovered / Attempted]**, **[The Exact Blocker]**, এবং **[What I Need / Suggested Next Step]**। (৩) প্রজেক্টের ডেলিভারি ডেটলাইনের কোনো ঝুঁকি তৈরি হলে ডেলিভারির দিনে নয়, বরং ২–৩ দিন আগেই টিম লিডকে সতর্ক করি যাতে প্রয়োজনে প্রায়োরিটি অ্যাডজাস্ট বা অন্য কাউকে হেল্পে লাগানো যায়। এর ফলে রিমোট টিমে সর্বোচ্চ বিশ্বাস ও ট্রান্সপারেন্সি বজায় থাকে।",
+          b: "রিমোট টিমে দীর্ঘ সময় কাউকে না জানিয়ে আটকে থাকা উচিত নয়। কোনো কাজে বাধা পেলে স্ল্যাকে পয়েন্ট আকারে সমস্যা, কী চেষ্টা করেছি এবং কী সাহায্য দরকার তা স্পষ্ট জানিয়ে দিই। ডেটলাইনের ঝুঁকি থাকলে আগেভাগেই লিডকে অবহিত করে কাজের স্বচ্ছতা বজায় রাখি।",
+          e: "In remote distributed engineering, transparency and early communication prevent delivery surprises. If an unexpected blocker halts momentum for more than 1–2 hours, I post an asynchronous brief in Slack structured with: Context, Root-Cause Telemetry, Attempted Solutions, and Proposed Next Steps. If sprint delivery milestones are endangered, I flag risks days ahead rather than on deadline morning, fostering high trust across timezones.",
+          tip: "World Corp Digital-এর নিয়োগ বিজ্ঞপ্তিতে 'Communicates blockers early and clearly' একটি মূল মানদণ্ড—এই উত্তরটি তাদের হৃদয় ছুঁয়ে যাবে।"
+        }
+      ]
     }
   ]
 };

@@ -289,6 +289,100 @@ window.NT_DATA.database = {
       ]
     },
     {
+      id: "mongoose-odm",
+      name: "Mongoose ODM & Document Modeling",
+      desc: "Schema Definitions, Validators, Pre/Post Middleware Hooks, Virtuals, Population vs Lookup, Lean Queries",
+      items: [
+        {
+          lvl: "lvl1",
+          q: "Node.js অ্যাপ্লিকেশনে Mongoose ODM কেন ব্যবহার করা হয় এবং Mongoose Schema বনাম Model-এর পার্থক্য কী?",
+          m: "MongoDB মূলত স্কিমা-লেস (Schemaless) ডাটাবেজ, যার ফলে যে কেউ ভুল ফিল্ড বা ইনভ্যালিড ডাটা ইনসার্ট করতে পারে। Mongoose অ্যাপ্লিকেশন লেভেলে একটি কঠোর স্কিমা, ডাটা টাইপ ভ্যালিডেশন এবং মডেলিং স্ট্রাকচার তৈরি করে। 'Schema' হলো ডকুমেন্টের একটি ব্লুপ্রিন্ট বা নকশা—যেখানে কোন কোন ফিল্ড থাকবে, তাদের ডাটা টাইপ কী, রিকোয়ার্ড কিনা ইত্যাদি ডিক্লেয়ার করা হয়। আর 'Model' হলো সেই স্কিমা থেকে তৈরি হওয়া একটি কমপ্লিট কনস্ট্রাক্টর ফাংশন বা ক্লাস, যার মাধ্যমে আমরা ডাটাবেজে আসল CRUD অপারেশন (`Model.find()`, `Model.create()`) চালাই।",
+          b: "মঙ্গোডিবিতে কোনো নির্দিষ্ট স্কিমা না থাকায় অ্যাপ্লিকেশন লেভেলে ডেটা ভ্যালিডেশন নিশ্চিত করতে মঙ্গুজ ব্যবহার করা হয়। স্কিমা হলো ডকুমেন্টের স্ট্রাকচার বা নিয়মের নকশা, আর মডেল হলো সেই স্কিমা থেকে তৈরি অবজেক্ট যার মাধ্যমে ডাটাবেজে কুয়েরি বা রেকর্ড সেভ করা হয়।",
+          e: "Mongoose is an Object Data Modeling (ODM) library for MongoDB that enforces strict application-level schemas, casting, and validation over inherently schemaless collections. A Mongoose Schema defines the structural blueprint, data types, validators, and hooks of a document. A Mongoose Model is a compiled constructor derived from the schema providing the runtime programmatic interface for executing CRUD queries against the collection.",
+          code: "import { Schema, model } from 'mongoose';\nconst productSchema = new Schema({\n  title: { type: String, required: [true, 'নাম দেওয়া আবশ্যক'], trim: true },\n  price: { type: Number, required: true, min: [0, 'দাম নেগেটিভ হতে পারে না'] },\n  stock: { type: Number, default: 0 }\n}, { timestamps: true });\nexport const Product = model('Product', productSchema);"
+        },
+        {
+          lvl: "lvl2",
+          q: "Mongoose Middleware (Pre ও Post Hooks) কীভাবে কাজ করে এবং ইউজার পাসওয়ার্ড হ্যাশিংয়ে `pre('save')` কেন সেরা উদাহরণ?",
+          m: "Mongoose Middleware হলো এমন কিছু ফাংশন যা নির্দিষ্ট কোনো ডকুমেন্ট অপারেশন (যেমন: `save`, `validate`, `remove`, `updateOne`) এক্সিকিউট হওয়ার ঠিক আগে (`pre`) অথবা পরে (`post`) স্বয়ংক্রিয়ভাবে রান হয়। পাসওয়ার্ড হ্যাশিংয়ের জন্য `pre('save')` হুক আদর্শ: ইউজার যখন রেজিস্টার করে বা পাসওয়ার্ড পরিবর্তন করে, ডাটাবেজে সেভ হওয়ার ঠিক আগের মুহূর্তে এই হুক চেক করে `this.isModified('password')`। যদি পাসওয়ার্ড পরিবর্তিত হয়ে থাকে, তবে এটি `bcrypt.hash()` দিয়ে পাসওয়ার্ড হ্যাশ করে `this.password`-এ বসিয়ে দেয়। কন্ট্রোলারের ভেতর আলাদাভাবে হ্যাশিং কোড লেখার কোনো প্রয়োজন পড়ে না।",
+          b: "মঙ্গুজ মিডলওয়্যার বা প্রি/পোস্ট হুক কোনো রেকর্ড সেভ বা আপডেট হওয়ার ঠিক আগে ও পরে স্বয়ংক্রিয়ভাবে কাজ করে। ইউজার পাসওয়ার্ড সেভ করার ঠিক পূর্বে pre('save') হুক দিয়ে পাসওয়ার্ড বিসিঙ্ক্রোনাসলি হ্যাশ করে সুরক্ষিত করা যায়।",
+          e: "Mongoose middleware (pre and post hooks) intercept execution flow during document lifecycle events like validation, saving, and deletion. In user authentication, a pre('save') hook intercepts user mutations: using 'this.isModified(\"password\")' to detect changes, it transparently hashes the raw password using bcrypt before persisting the document, preventing plaintext password leakage without polluting controller handlers.",
+          code: "userSchema.pre('save', async function(next) {\n  if (!this.isModified('password')) return next();\n  this.password = await bcrypt.hash(this.password, 12);\n  next();\n});"
+        },
+        {
+          lvl: "lvl3",
+          q: "Mongoose-এ `populate()` কীভাবে কাজ করে? এর পারফরম্যান্স সীমাবদ্ধতা এবং `.lean()` মেথডের গুরুত্ব কী?",
+          m: "`populate()` রিলেশনাল ডাটাবেজের JOIN-এর মতো কাজ করে—এটি এক ডকুমেন্টের `ObjectId` রেফারেন্স ধরে অন্য কালেকশন থেকে ডাটা ফেচ করে নিয়ে আসে। তবে ইন্টারনালি এটি কিন্তু একক এসকিউএল জয়েন নয়, বরং ব্যাকগ্রাউন্ডে অতিরিক্ত কুয়েরি চালিয়ে ডাটা মার্জ করে। অনেক বেশি নেস্টেড `populate()` চালালে মারাত্মক N+1 লেটেন্সি তৈরি হয়। আর ডিফল্টভাবে Mongoose প্রতিটি ডকুমেন্টকে পূর্ণাঙ্গ Mongoose Document ইনস্ট্যান্সে রূপান্তর করে (যাতে মেমোরি ও সিপিইউ খরচ বেশি হয়)। শুধুমাত্র ডাটা রিড বা এপিআই রেসপন্সের ক্ষেত্রে **`.lean()`** ব্যবহার করলে এটি সাধারণ জাভাস্ক্রিপ্ট প্লেইন অবজেক্ট (POJO) রিটার্ন করে—যার ফলে কুয়েরি স্পিড ৩–৫ গুণ বাড়ে এবং মেমোরি খরচ ৭০% কমে যায়!",
+          b: "পপুলেট (populate) অন্য কালেকশন থেকে রেফারেন্স করা ডেটা যুক্ত করে আনে, তবে বেশি ব্যবহারে কুয়েরি স্লো হতে পারে। শুধুমাত্র ডেটা পড়ার জন্য .lean() মেথড ব্যবহার করলে মঙ্গুজ অতিরিক্ত মেমোরি খরচ বাদ দিয়ে সাধারণ অবজেক্ট ফেরত দেয়, যা এপিআই রেসপন্সকে কয়েক গুণ দ্রুত করে।",
+          e: "Mongoose's populate() emulates relational joins by resolving document ObjectIds via supplementary queries. However, chaining multiple deep populates introduces severe I/O latency. By default, Mongoose hydrates every result into a heavy Mongoose Document wrapper. Appending '.lean()' skips internal hydration, returning lightweight Plain Old JavaScript Objects (POJOs), slashing memory footprint by ~70% and accelerating API serialization.",
+          code: "// Fast read query with .lean()\nconst orders = await Order.find({ status: 'DELIVERED' })\n  .select('orderNumber totalAmount createdAt')\n  .populate('customer', 'name email phone')\n  .lean()\n  .exec();"
+        },
+        {
+          lvl: "situation",
+          q: "একটি ই-কমার্স ক্যাটালগে ক্যাটাগরি অনুসারে ফিল্টার এবং মূল্য অনুযায়ী সর্টিং করার সময় Mongoose কুয়েরি খুব স্লো হচ্ছে। কীভাবে অপটিমাইজ করবে?",
+          m: "স্লো হওয়ার কারণ হলো ক্যাটালগ কালেকশনে কম্পাউন্ড ইনডেক্স নেই এবং কুয়েরিতে সব ফিল্ড আননেসেসারি ফেচ হচ্ছে। অপটিমাইজেশনের ধাপ: (১) ডাটাবেজে একটি কম্পোজিট ইনডেক্স তৈরি করব: `productSchema.index({ category: 1, price: 1 })`। এর ফলে ফিল্টারিং ও সর্টিং একই ইনডেক্সে মেমোরি থেকে হবে। (২) `.select('name price thumbnail slug')` দিয়ে অপ্রয়োজনীয় দীর্ঘ ডেসক্রিপশন ফিল্ড বাদ দেব। (৩) `.lean()` যোগ করব যাতে অবজেক্ট ওভারহেড না থাকে। (৪) পেজিনেশনের জন্য `skip()`-এর বদলে Range/Cursor-based কুয়েরি ব্যবহার করব।",
+          b: "এই কুয়েরি অপটিমাইজ করতে ক্যাটাগরি ও প্রাইসের উপর কম্পোজিট ইনডেক্স তৈরি করতে হবে। অপ্রয়োজনীয় ফিল্ড বাদ দিয়ে শুধু দরকারি ডেটা সিলেক্ট করতে হবে এবং .lean() দিয়ে হালকা অবজেক্ট ফেচ করতে হবে। এর ফলে কুয়েরি সময় সেকেন্ড থেকে মিলিসেকেন্ডে নেমে আসবে।",
+          e: "Optimization requires establishing a composite index matching query patterns: 'schema.index({ category: 1, price: 1 })' adhering to the Equality-Sort-Range (ESR) rule. Restrict network payloads using selective projections (.select()), eliminate Mongoose hydration with .lean(), and replace expensive skip-based pagination with indexed cursor lookups on high-volume catalogs.",
+          code: "productSchema.index({ category: 1, price: 1 });\n// Query:\nconst products = await Product.find({ category: catId })\n  .sort({ price: 1 })\n  .select('title price thumbnail')\n  .lean();"
+        },
+        {
+          lvl: "realworld",
+          q: "Dokani POS-এর মতো মাল্টি-টেন্যান্ট রিটেইল সিস্টেমে Mongoose দিয়ে বিভিন্ন দোকানের কাস্টম প্রোডাক্ট এট্রিবিউটস কীভাবে হ্যান্ডেল করা যায়?",
+          m: "রিটেইল ব্যবসায় বিভিন্ন দোকানের পণ্যের বৈশিষ্ট্য আলাদা (যেমন কাপড়ের দোকানে সাইজ/রং, মুদি দোকানে ওজন/ব্র্যান্ড, ফার্মেসিতে জেনেরিক/ব্যাচ নম্বর)। রিলেশনাল ডাটাবেজে প্রতিটির জন্য কলাম বাড়ানো কঠিন। Mongoose-এ আমরা **Polymorphic / Hybrid Document Pattern** ব্যবহার করতে পারি: মূল ফিল্ডগুলো (নাম, বারকোড, কেনা দাম, বিক্রয় মূল্য) ফিক্সড টাইপ থাকবে, আর একটি `attributes` ফিল্ড `Map of Mixed` অথবা সাব-ডকুমেন্ট অ্যারে থাকবে। সেখানে যে কোনো দোকানদার নিজের কাস্টম ফিল্ড সেভ করতে পারবে, এবং `attributes` ফিল্ডের ওপর ওয়াইল্ডকার্ড ইনডেক্স `index({ 'attributes.$**': 1 })` বসিয়ে ফাস্ট সার্চ নিশ্চিত করা যায়।",
+          b: "বিভিন্ন দোকানের বৈচিত্র্যময় পণ্যের তথ্য সংরক্ষণে মঙ্গুজে হাইব্রিড ডকুমেন্ট প্যাটার্ন ব্যবহার করা হয়। সাধারণ তথ্যের পাশাপাশি একটি ওপেন অবজেক্ট বা সাব-ডকুমেন্ট রাখা হয় যেখানে কাপড়ের সাইজ বা ওষুধের ব্যাচ নাম্বার স্বাধীনভাবে সেভ করা যায়।",
+          e: "For heterogeneous retail merchandise across multi-tenant stores, Mongoose allows implementing the Hybrid Document Pattern. Fixed attributes (SKU, barcode, pricing, tenantId) remain strictly validated, while variable attributes are modeled as flexible sub-document maps: 'attributes: { type: Map, of: Schema.Types.Mixed }'. Applying MongoDB wildcard indexes ensures high-speed lookups across dynamic merchant attributes without requiring continuous schema migrations.",
+          tip: "এই প্যাটার্নটি প্রমাণ করে তুমি জানো কখন NoSQL ফ্লেক্সিবিলিটি রিলেশনাল মডেলের চেয়ে সুবিধাজনক।"
+        }
+      ]
+    },
+    {
+      id: "supabase-rls",
+      name: "Supabase & Row Level Security (RLS)",
+      desc: "PostgreSQL RLS Policies, auth.uid(), Next.js 15 @supabase/ssr, Realtime Subscriptions, Supabase Storage & Edge Functions",
+      items: [
+        {
+          lvl: "lvl1",
+          q: "Supabase কী এবং ট্র্যাডিশনাল কাস্টম Node.js ব্যাকএন্ডের তুলনায় এর মূল সুবিধাসমূহ কী কী?",
+          m: "Supabase হলো একটি ওপেন-সোর্স Firebase বিকল্প যা সম্পূর্ণ শক্তিশালী **PostgreSQL** ডাটাবেজের ওপর নির্মিত। এটি ডেভেলপারদের ইনস্ট্যান্ট ৫টি প্রধান সুবিধা দেয়: (১) অটো-জেনারেটেড REST ও GraphQL API (PostgREST দিয়ে), (২) বিল্ট-ইন ইউজার অথেন্টিকেশন (GoTrue), (৩) ডাটাবেজ লেভেল সিকিউরিটি পলিসি (PostgreSQL RLS), (৪) রিয়েল-টাইম ডাটাবেজ ইভেন্ট লিসেনিং (WebSockets CDC), এবং (৫) এসথ্রি-কম্প্যাটিবল ফাইল স্টোরেজ। ট্র্যাডিশনাল ব্যাকএন্ডের মতো প্রতি টেবিলের জন্য আলাদা আলাদা ক্রাড (CRUD) কন্ট্রোলার, রাউট ও অথেন্টিকেশন বয়লারপ্লেট কোড না লিখে সরাসরি ফ্রন্টএন্ড বা নেক্সটজেএস থেকে ডাটাবেজে সিকিউর কুয়েরি চালানো যায়।",
+          b: "সুপাবেজ (Supabase) হলো একটি ওপেন-সোর্স ক্লাউড প্ল্যাটফর্ম যা সরাসরি পোস্টগ্রেস ডাটাবেজের উপর তৈরি। এটি ব্যবহারকারীদের আলাদা করে ব্যাকএন্ড কন্ট্রোলার ও রাউট না লিখে স্বয়ংক্রিয় এপিআই, অথেন্টিকেশন, রিয়েল-টাইম সকেট এবং ফাইল স্টোরেজ ব্যবহারের সুযোগ দেয়।",
+          e: "Supabase is an open-source Backend-as-a-Service (BaaS) built on top of enterprise-grade PostgreSQL. Key architectural components include: PostgREST for auto-generating RESTful endpoints directly from SQL schemas, GoTrue for tokenized OAuth and JWT authentication, PostgreSQL Row Level Security (RLS) for data governance, Realtime for WebSocket change streams, and S3-compatible file storage, eliminating standard CRUD API boilerplate.",
+          tip: "World Corp Digital-এর ইন্টারভিউতে Supabase-কে শুধুমাত্র 'একটি ডাটাবেজ' না বলে 'PostgreSQL-এর ওপর কমপ্লিট ক্লাউড প্ল্যাটফর্ম' হিসেবে তুলে ধরবে।"
+        },
+        {
+          lvl: "lvl2",
+          q: "PostgreSQL Row Level Security (RLS) কী এবং `CREATE POLICY` দিয়ে কীভাবে মাল্টি-ইউজার বা মাল্টি-টেন্যান্ট সিকিউরিটি নিশ্চিত করা হয়?",
+          m: "ট্র্যাডিশনাল অ্যাপ্লিকেশনে সিকিউরিটি থাকে Node.js কোডে (`if (req.user.id !== doc.userId)`), যার ফলে ডেভেলপার কোনো এপিআইতে ফিল্টার দিতে ভুলে গেলে ডাটা লিক হয়। **Row Level Security (RLS)** ডাটাবেজ লেভেলে কার্যকর হয়: ডাটাবেজ স্বয়ংক্রিয়ভাবে চেক করে যে ইউজার কুয়েরি চালাচ্ছে সে এই নির্দিষ্ট রো দেখতে বা পরিবর্তন করতে অনুমোদিত কিনা। Supabase-এ টেবিলের ওপর `ALTER TABLE documents ENABLE ROW LEVEL SECURITY;` চালু করে পলিসি লেখা হয়: `USING (auth.uid() = user_id)`। এর ফলে ফ্রন্টএন্ড থেকে যে কোনো ইউজার `supabase.from('documents').select('*')` চালালেও ডাটাবেজ কেবল সেই ইউজারের নিজস্ব রোগুলোই ফেরত দেবে, অন্য কোনো ইউজারের ডাটা দেখতেই পাবে না!",
+          b: "রো লেভেল সিকিউরিটি (RLS) হলো ডাটাবেজের নিজস্ব নিরাপত্তা ব্যবস্থা যা স্বয়ংক্রিয়ভাবে নিশ্চিত করে একজন ব্যবহারকারী শুধু নিজের তৈরি ডেটাই দেখতে বা সম্পাদনা করতে পারবে। এপ্লিকেশন কোডে কোনো ভুল হলেও ডাটাবেজ অন্য ইউজারের ডেটা কখনোই প্রকাশ করে না।",
+          e: "PostgreSQL Row Level Security (RLS) enforces authorization at the database engine tier rather than relying solely on application middleware. Once enabled on a table, all SELECT/INSERT/UPDATE/DELETE queries are evaluated against cryptographic security policies. In Supabase, policies leverage the built-in helper 'auth.uid() = user_id' so that client-side queries can never read or mutate records belonging to other tenants.",
+          code: "-- Enable RLS and define Tenant Isolation Policy\nALTER TABLE invoices ENABLE ROW LEVEL SECURITY;\n\nCREATE POLICY \"Users can only read their own invoices\"\nON invoices FOR SELECT\nUSING (auth.uid() = user_id);\n\nCREATE POLICY \"Users can only insert their own invoices\"\nON invoices FOR INSERT\nWITH CHECK (auth.uid() = user_id);"
+        },
+        {
+          lvl: "lvl3",
+          q: "Next.js 15 App Router-এর সাথে Supabase কীভাবে ইন্টিগ্রেট করবে? `@supabase/ssr` দিয়ে কুকি ম্যানেজমেন্ট ও মিডলওয়্যার সেশন রিফ্রেশ কেন জরুরি?",
+          m: "Next.js App Router-এ সার্ভার কম্পোনেন্ট, সার্ভার অ্যাকশন ও ক্লায়েন্ট কম্পোনেন্ট একসাথে চলে। ক্লায়েন্টের LocalStorage সার্ভার কম্পোনেন্ট রিড করতে পারে না। তাই আমরা **`@supabase/ssr`** প্যাকেজ ব্যবহার করি, যা সিকিউর `HttpOnly` কুকিজের মাধ্যমে অথেন্টিকেশন সেশন ম্যানেজ করে। (১) `middleware.ts`-এ প্রতি রিকোয়েস্টে Supabase ক্লায়েন্ট ইনিশিয়ালাইজ করে সেশন রিফ্রেশ করি যাতে ইউজারের টোকেন এক্সপায়ার না হয়। (২) Server Components-এ `createClient()` ডেকে সিকিউরভাবে সরাসরি ডাটাবেজ রিড করি (কোনো পাবলিক এপিআই কল ছাড়াই)। (৩) Server Actions-এ কুকি ব্যবহার করে ডেটা মিউটেশন করি।",
+          b: "নেক্সটজেএস ১৫ অ্যাপ রাউটারে সার্ভার কম্পোনেন্ট লোকাল স্টোরেজ পড়তে পারে না, তাই @supabase/ssr প্যাকেজ দিয়ে কুকিতে সেশন টোকেন রাখা হয়। মিডলওয়্যারের মাধ্যমে টোকেন স্বয়ংক্রিয়ভাবে রিফ্রেশ হয় এবং সার্ভার অ্যাকশনে নিরাপদ ডাটাবেজ কুয়েরি চালানো যায়।",
+          e: "In Next.js 15 App Router, Server Components execute entirely on the server and cannot access browser LocalStorage. Integrating Supabase requires '@supabase/ssr' to store JWT session tokens in secure, encrypted HTTP cookies. Next.js middleware continuously validates and refreshes expired tokens on incoming requests, while Server Components and Server Actions leverage 'createServerClient' to query PostgreSQL with full RLS context.",
+          code: "// middleware.ts in Next.js 15\nimport { createServerClient } from '@supabase/ssr';\nimport { NextResponse, type NextRequest } from 'next/server';\n\nexport async function middleware(request: NextRequest) {\n  let response = NextResponse.next({ request: { headers: request.headers } });\n  const supabase = createServerClient(\n    process.env.NEXT_PUBLIC_SUPABASE_URL!,\n    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,\n    {\n      cookies: {\n        getAll() { return request.cookies.getAll(); },\n        setAll(cookiesToSet) { cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options)); }\n      }\n    }\n  );\n  await supabase.auth.getUser();\n  return response;\n}"
+        },
+        {
+          lvl: "situation",
+          q: "একটি অনলাইন মার্কেটপ্লেসে ভেন্ডররা নতুন অর্ডার আসার সাথে সাথে পেজ রিফ্রেশ ছাড়াই লাইভ নোটিফিকেশন পেতে চায়। Supabase Realtime দিয়ে কীভাবে সমাধান করবে?",
+          m: "Supabase Realtime পোস্টগ্রেসের **Change Data Capture (CDC / Wal2json)** প্রযুক্তি ব্যবহার করে সরাসরি ডাটাবেজ লেভেলের ইভেন্ট লিসেন করে। সমাধান: (১) ডাটাবেজের `orders` টেবিলের ওপর Realtime পাবলিকেশন অন করব। (২) ভেন্ডরের ফ্রন্টএন্ড ড্যাশবোর্ডে `supabase.channel('vendor-orders')` সাবস্ক্রাইব করব যেখানে ফিল্টার থাকবে `filter: 'vendor_id=eq.' + currentVendorId`। (৩) যখনই কাস্টমার নতুন অর্ডার দেবে, ডাটাবেজে রো ইনসার্ট হওয়ামাত্র পোস্টগ্রেস ইঞ্জিন ওয়েবসকেট দিয়ে ভেন্ডরের স্ক্রিনে `INSERT` পে-লোড পুশ করবে এবং ড্যাশবোর্ডে লাইভ অর্ডার ও অডিও বিপ বেজে উঠবে। কোনো আলাদা Socket.io সার্ভার মেইনটেইন করার প্রয়োজনই হবে না!",
+          b: "সুপাবেজ রিয়েল-টাইম ফিচার ব্যবহার করে পোস্টগ্রেস ডাটাবেজে নতুন রো ইনসার্ট হওয়ামাত্র ওয়েবসকেটের মাধ্যমে ভেন্ডরের স্ক্রিনে তাৎক্ষণিক নোটিফিকেশন পাঠানো যায়। এর ফলে কোনো বাহ্যিক সকেট সার্ভার ছাড়াই কয়েক লাইনের কোডে লাইভ অর্ডার ট্র্যাকিং তৈরি করা সম্ভব।",
+          e: "Supabase Realtime listens to PostgreSQL's Write-Ahead Log (WAL) replication stream to broadcast database mutations over WebSockets. In vendor portals, subscribe to row-level changes via 'supabase.channel()', filtering by vendor_id on the orders table. When a customer executes checkout, PostgreSQL dispatches an instant INSERT payload over the established socket, rendering order badges and triggering audio alerts with zero custom WebSocket infrastructure.",
+          code: "const channel = supabase\n  .channel('live-orders')\n  .on('postgres_changes', {\n    event: 'INSERT',\n    schema: 'public',\n    table: 'orders',\n    filter: `vendor_id=eq.${vendorId}`\n  }, (payload) => {\n    playAudioBeep();\n    setOrders(prev => [payload.new, ...prev]);\n  })\n  .subscribe();"
+        },
+        {
+          lvl: "realworld",
+          q: "Supabase Storage-এ কাস্টমারদের ইনভয়েস পিডিএফ ও স্পর্শকাতর ডকুমেন্টস সংরক্ষণ করার সময় RLS পলিসি ও Signed URLs কীভাবে ব্যবহার করবে?",
+          m: "কাস্টমার বা ভেন্ডরদের ইনভয়েস ও আর্থিক ডকুমেন্টস কখনো পাবলিক বালতিতে (Public Bucket) রাখা যাবে না। সমাধান: (১) Supabase Storage-এ একটি **Private Bucket** `invoices` তৈরি করব। (২) `storage.objects` টেবিলের ওপর RLS পলিসি দেব যাতে শুধুমাত্র সেই ইনভয়েসের মালিক ইউজার বা শপ ওনার ফাইলটি পড়তে পারে। (৩) কোনো কাস্টমার ইনভয়েস দেখতে চাইলে আমরা সরাসরি পার্মানেন্ট লিঙ্ক না দিয়ে **Time-limited Signed URL** তৈরি করব (`supabase.storage.from('invoices').createSignedUrl(filePath, 60)`) যা মাত্র ৬০ সেকেন্ড পর্যন্ত ভ্যালিড থাকে। ফলে লিঙ্ক কপি করে অন্য কেউ ফাইল চুরি করতে পারে না।",
+          b: "গোপনীয় ইনভয়েস সুরক্ষায় প্রাইভেট স্টোরেজ বাকেট এবং পোস্টগ্রেস আরএলএস পলিসি ব্যবহার করা হয়। ব্যবহারকারীকে সরাসরি ফাইলের লিঙ্ক না দিয়ে ৬০ সেকেন্ড মেয়াদী সাইনড ইউআরএল (Signed URL) দেওয়া হয়, যা নির্দিষ্ট সময় পর অকেজো হয়ে যায় এবং তথ্যের গোপনীয়তা বজায় রাখে।",
+          e: "Protecting confidential financial invoices in Supabase mandates using private storage buckets with strict Row Level Security applied to 'storage.objects'. Anonymous access is blocked entirely. For authorized views, generate short-lived Signed URLs via 'supabase.storage.from('invoices').createSignedUrl(path, 60)', expiring within 60 seconds. This prevents unauthorized link sharing while ensuring cryptographic access control.",
+          tip: "Signed URL ও Private Storage RLS পলিসির কম্বিনেশন এন্টারপ্রাইজ ফিনটেক ও মার্কেটপ্লেস আর্কিটেকচারের স্ট্যান্ডার্ড।"
+        }
+      ]
+    },
+    {
       id: "db-backup-maintenance",
       name: "Database Backup, Pooling & Maintenance",
       desc: "pg_dump & Automated Backups, Point-in-Time Recovery, PgBouncer Connection Pooling, Vacuuming, Zero-Downtime Migrations",

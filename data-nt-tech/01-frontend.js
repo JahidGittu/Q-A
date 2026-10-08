@@ -397,6 +397,53 @@ window.NT_DATA.frontend = {
           tip: "Git ব্রাঞ্চ প্রটেকশন ও কনভেনশনাল কমিটের কথা বলা প্রফেশনাল টিমওয়ার্কের প্রমাণ।"
         }
       ]
+    },
+    {
+      id: "automated-testing-quality",
+      name: "Automated Testing & Code Quality (Jest, RTL & Playwright)",
+      desc: "Component Unit Testing, React Testing Library, Mocking APIs (MSW), E2E with Playwright, Flaky Test Prevention",
+      items: [
+        {
+          lvl: "lvl1",
+          q: "Frontend অ্যাপ্লিকেশনে Automated Testing কেন প্রয়োজন এবং Unit, Integration ও End-to-End (E2E) টেস্টের মধ্যে পার্থক্য কী?",
+          m: "Automated Testing ছাড়া কোডবেস বড় হলে নতুন ফিচার যোগ করতে গেলে পুরোনো ফিচার ভেঙে পড়ে (Regression Bugs)। টেস্ট পিরামিড অনুযায়ী ৩টি প্রধান স্তর: (১) **Unit Testing:** একক কোনো স্বতন্ত্র ফাংশন বা ইউটিলিটি টেস্ট করা (যেমন: ডিসকাউন্ট বা ট্যাক্স ক্যালকুলেটর ফাংশন Jest দিয়ে টেস্ট করা)। (২) **Integration Testing:** একাধিক কম্পোনেন্ট এবং স্টেট হুক একসাথে মিলে সঠিকভাবে কাজ করছে কিনা যাচাই করা (যেমন: React Testing Library দিয়ে ফর্ম ফিলাপ ও সাবমিট টেস্ট করা)। (৩) **E2E Testing:** সম্পূর্ণ আসল ব্রাউজার খুলে আসল ইউজারের মতো পুরো ফ্লো টেস্ট করা (যেমন: Playwright দিয়ে লগইন থেকে পেমেন্ট চেকআউট পর্যন্ত সম্পূর্ণ ফ্লো টেস্ট করা)।",
+          b: "অটোমেটেড টেস্টিং নিশ্চিত করে নতুন কোড যোগ করার পর পুরোনো কোনো ফিচার নষ্ট হয়নি। ইউনিট টেস্ট দিয়ে ছোট ছোট ফাংশন যাচাই করা হয়, ইন্টিগ্রেশন টেস্ট দিয়ে কম্পোনেন্টগুলোর পারস্পরিক যোগাযোগ টেস্ট করা হয় এবং এন্ড-টু-এন্ড টেস্ট দিয়ে প্লেরাইট ব্রাউজারে আসল ব্যবহারকারীর মতো সম্পূর্ণ জার্নি পরীক্ষা করা হয়।",
+          e: "Automated testing prevents regression bugs and maintains refactoring confidence. The testing pyramid comprises: Unit Testing (isolated functions like pricing or formatting utilities tested via Jest/Vitest), Integration Testing (verifying component interactions, hooks, and forms via React Testing Library), and End-to-End (E2E) Testing (driving headless Chromium browsers via Playwright to validate critical customer journeys like signup, cart checkout, and payment gateways).",
+          code: "// Unit Test Example (Jest/Vitest)\ndescribe('calculateGrandTotal', () => {\n  it('applies percentage discount and tax correctly', () => {\n    const total = calculateGrandTotal({ subtotal: 1000, discountPct: 10, taxPct: 5 });\n    expect(total).toBe(945);\n  });\n});"
+        },
+        {
+          lvl: "lvl2",
+          q: "React Testing Library (RTL)-এ কম্পোনেন্ট টেস্ট করার মূল দর্শন কী এবং Implementation Details টেস্ট করা কেন নিষেধ?",
+          m: "RTL-এর মূল নীতি: 'The more your tests resemble the way your software is used, the more confidence they can give you.' অর্থাৎ কম্পোনেন্টের ভেতরের ইন্টারনাল স্টেট ভেরিয়েবল বা মেথড টেস্ট করা উচিত নয় (যেমন: `wrapper.state('count')` টেস্ট করা নিষিদ্ধ)। বরং ব্যবহারকারী স্ক্রিনে যা দেখে এবং যেভাবে ইন্টারঅ্যাক্ট করে ঠিক সেভাবে টেস্ট করতে হবে: (১) এক্সেসিবল রোল ধরে খোঁজা (`getByRole('button', { name: /submit/i })`), (২) ইউজারের ইনপুট সিমুলেট করা (`await userEvent.type(input, '1234')`), (৩) স্ক্রিনে আউটপুট প্রদর্শিত হওয়া অ্যাসার্ট করা (`expect(screen.getByText('সফল হয়েছে')).toBeInTheDocument()`)। এর ফলে কম্পোনেন্ট ইন্টারনালি রিফ্যাক্টর করলেও টেস্ট ভাঙে না।",
+          b: "রিঅ্যাক্ট টেস্টিং লাইব্রেরির মূল উদ্দেশ্য হলো আসল ইউজারের দৃষ্টিকোণ থেকে অ্যাপ্লিকেশন টেস্ট করা। কম্পোনেন্টের ভেতরের স্টেট ভেরিয়েবল টেস্ট না করে বাটন ক্লিক, ফর্ম টাইপ এবং স্ক্রিনের দৃশ্যমান টেক্সট যাচাই করা হয় যাতে কোড রিফ্যাক্টর করলেও টেস্ট সহজে নষ্ট না হয়।",
+          e: "React Testing Library enforces user-centric testing: tests must interact with components purely through accessible DOM nodes rather than spying on internal state or implementation details. Queries prioritize accessibility (screen.getByRole, getByLabelText), and interactions are simulated using '@testing-library/user-event'. This ensures tests survive code refactors as long as user behavior remains identical.",
+          code: "import { render, screen } from '@testing-library/react';\nimport userEvent from '@testing-library/user-event';\nimport { LoginForm } from './LoginForm';\n\ntest('submits credentials and renders success message', async () => {\n  render(<LoginForm />);\n  await userEvent.type(screen.getByLabelText(/ইমেইল/i), 'admin@dokani.com');\n  await userEvent.type(screen.getByLabelText(/পাসওয়ার্ড/i), 'secret123');\n  await userEvent.click(screen.getByRole('button', { name: /লগইন/i }));\n  expect(await screen.findByText(/স্বাগতম/i)).toBeInTheDocument();\n});"
+        },
+        {
+          lvl: "lvl3",
+          q: "Playwright দিয়ে Modern Web App-এ End-to-End (E2E) টেস্ট কীভাবে সেট করবে এবং এটি কেন Cypress-এর চেয়ে অনেক বেশি ফাস্ট ও রিলায়েবল?",
+          m: "Playwright মাইক্রোসফটের তৈরি আধুনিক E2E ফ্রেমওয়ার্ক। কেন এটি সেরা: (১) এটি সরাসরি ব্রাউজারের Chrome DevTools Protocol (CDP) দিয়ে কাজ করে, কোনো স্লো ইন-ব্রাউজার স্ক্রিপ্ট ইনজেকশন নয়। (২) **Auto-Waiting:** বাটন ক্লিকযোগ্য হওয়া, রেন্ডার হওয়া বা নেটওয়ার্ক রিকোয়েস্ট শেষ হওয়া পর্যন্ত প্লেরাইট নিজে থেকেই মাইক্রো-ওয়েট করে, তাই ম্যানুয়াল `sleep(3000)` লেখার কোনো প্রয়োজন হয় না। (৩) **Parallel Execution:** মাল্টিপল ওয়ার্কারে একই সাথে শত শত টেস্ট চালাতে পারে। (৪) স্টোরেজ স্টেট রিইউজ করে প্রতি টেস্টে বারবার লগইন পেজে না গিয়ে সরাসরি অথেন্টিকেটেড স্টেটে পেজ ওপেন করা যায়।",
+          b: "প্লেরাইট (Playwright) আধুনিক ব্রাউজার টেস্টিংয়ের শীর্ষ ফ্রেমওয়ার্ক। এটি অটো-ওয়েটিং ফিচারের কারণে নেটওয়ার্কের জন্য টেস্ট আটকে না গিয়ে নির্ভুলভাবে চলে। একই সাথে একাধিক ব্রাউজারে প্যারালাল টেস্ট চালানো যায় এবং লগইন সেশন সংরক্ষণ করে অতি দ্রুত পুরো চেকআউট ফ্লো টেস্ট করা সম্ভব।",
+          e: "Playwright communicates directly with browser engines (Chromium, Firefox, WebKit) out-of-process via devtools protocols, making it dramatically faster and more resilient than Cypress. Its native Auto-Waiting waits for elements to be actionable before interacting, eliminating flaky timeouts. Storage State snapshots allow sharing authenticated sessions across test workers without repetitive UI login sequences.",
+          code: "import { test, expect } from '@playwright/test';\n\ntest('POS cashier can complete a cash checkout', async ({ page }) => {\n  await page.goto('/pos');\n  await page.locator('#barcode-input').fill('8941100234');\n  await page.keyboard.press('Enter');\n  await expect(page.locator('.cart-item')).toHaveCount(1);\n  await page.getByRole('button', { name: /ক্যাশ বিল/i }).click();\n  await expect(page.locator('.receipt-preview')).toBeVisible();\n});"
+        },
+        {
+          lvl: "situation",
+          q: "CI/CD পাইপলাইনে গিটহাব অ্যাকশনে মাঝেমধ্যেই টেস্ট ফেইল করছে (Flaky Tests) কিন্তু লোকাল মেশিনে রান করলে সবসময় পাস করে। কীভাবে এর আসল কারণ খুঁজে বের করে সমাধান করবে?",
+          m: "Flaky Tests মূলত ঘটে টাইমিং, নেটওয়ার্ক ল্যাগ বা শেয়ার্ড স্টেট কনফ্লিক্টের কারণে। সমাধানের ৪টি সুনির্দিষ্ট ধাপ: (১) **Hardcoded Timeout মুছে ফেলা:** কোনো অবস্থাতেই `setTimeout` বা `sleep(2000)` রাখা যাবে না; তার বদলে Playwright-এর ওয়েব-ফার্স্ট অ্যাসার্শন `await expect(el).toBeVisible()` অথবা RTL-এর `waitFor(() => ...)` ব্যবহার করব। (২) **Isolate Database State:** প্রতিটি টেস্টের শুরুতে ডাটাবেজ ট্রানজেকশনে ক্লিন টেস্ট ডাটা সিড করব যাতে আগের টেস্টের ডাটার সাথে ক্ল্যাশ না হয়। (৩) **Trace Viewer & Video:** Playwright-এ `trace: 'on-first-retry'` এনেবল করব, যা ফেইল হওয়া টেস্টের প্রতিটি মিলি-সেকেন্ডের স্ক্রিনশট, কনসোল লগ ও নেটওয়ার্ক ট্রাফিক রেকর্ড করে—যাতে লোকাল মেশিনে বসে ঠিক কোন ফ্রেমে এরর হয়েছে তা দেখা যায়।",
+          b: "সিআই পাইপলাইনে ফ্লেকি টেস্ট দূর করতে হার্ডকোডেড স্লিপ বা টাইমার বাদ দিয়ে অটো-ওয়েটিং ব্যবহার করতে হয়। টেস্টের জন্য স্বাধীন টেস্ট ডাটাবেজ ব্যবহার করতে হবে এবং প্লেরাইট ট্রেস ভিউয়ার (Trace Viewer) চালু করে ফেইল হওয়ামাত্র নেটওয়ার্ক ও স্ক্রিনশট লগ দেখে মূল সমস্যা দ্রুত ফিক্স করা যায়।",
+          e: "Flaky CI failures typically stem from asynchronous timing deltas or shared database pollution. Remediation steps: eliminate arbitrary sleeps in favor of web-first assertions (expect(locator).toBeVisible()), decouple test records by generating randomized tenant UUIDs per test execution, and configure Playwright Trace Viewer on retry ('trace: on-first-retry') to capture exact DOM snapshots, network payloads, and console logs during pipeline failures.",
+          tip: "প্লেরাইটের 'Trace Viewer' এবং ওয়েব-ফার্স্ট অ্যাসার্শনের কথা শুনলে সিনিয়র বা লিড ডেভেলপাররা সাথে সাথে নিশ্চিত হয় তুমি প্রোডাকশন কোয়ালিটি টেস্ট জানো।"
+        },
+        {
+          lvl: "realworld",
+          q: "Dokani POS-এর মতো জটিল ফিনান্সিয়াল সিস্টেমে কোনো নতুন কোড পুশ করার আগে তুমি কী কী টেস্ট দিয়ে কোয়ালিটি নিশ্চিত করতে?",
+          m: "Dokani-তে রিটেইল ক্যাশিয়ারদের নির্ভুলতার ওপর ব্যবসায়ীর পুরো লাভ-ক্ষতি নির্ভর করে। তাই আমরা ৩ স্তরের অটোমেটেড কোয়ালিটি গেট রেখেছিলাম: (১) **TypeScript Strict Compilation:** `tsc --noEmit` চালিয়ে কোনো টাইপ অমিল বা আনহ্যান্ডেল্ড নাল ফিল্ড আছে কিনা যাচাই করতাম। (২) **Jest Unit Tests:** ডিসকাউন্ট রুলস, ভ্যাট হিসাব, এবং ডাবল-এন্ট্রি লেজারের গাণিতিক লজিকের জন্য ১০০% ইউনিট টেস্ট কভারেজ থাকত। (৩) **Playwright Smoke Test:** পিআর ওপেন হলেই গিটহাব অ্যাকশন হেডলেস ব্রাউজারে একটি ফুল কার্ট তৈরি করে, বারকোড স্ক্যান করে এবং প্রিন্ট প্রিভিউ জেনারেট করে দেখত কোনো পেজ ব্রেক করেছে কিনা। কোনো টেস্ট ফেইল করলে পিআর মার্জ স্বয়ংক্রিয়ভাবে ব্লক হয়ে যেত।",
+          b: "দোকানি সিস্টেমে কোড পুশের আগে আমরা টাইপস্ক্রিপ্ট স্ট্রিক্ট চেক, লেজার ও ডিসকাউন্ট হিসাবের জন্য জেস্ট (Jest) ইউনিট টেস্ট এবং সম্পূর্ণ বিলিং ফ্লোর প্লেরাইট স্মোক টেস্ট রান করতাম। সবগুলো স্বয়ংক্রিয় টেস্ট সফল হলে তবেই কোড প্রোডাকশনে যেত।",
+          e: "For mission-critical operations in Dokani POS, code quality was safeguarded via automated CI gates: first, strict TypeScript compiler verification (tsc --noEmit) ensuring zero unsafe type coercions; second, 100% Jest unit coverage across financial arithmetic (tax tiers, split payments, multi-tender balance reconciliations); third, an automated Playwright smoke test simulating full barcode scanning and receipt generation. Pull requests were blocked from merging unless all test suites passed.",
+          tip: "এই টেস্ট পাইপলাইনের বর্ণনা বিশ্বমানের এন্টারপ্রাইজ স্ট্যান্ডার্ড নির্দেশ করে।"
+        }
+      ]
     }
   ]
 };
