@@ -2,8 +2,14 @@
   "version": 2,
   "cleanUrls": true,
   "outputDirectory": ".",
+  "redirects": [
+    { "source": "/NT-Tech", "destination": "/nt-tech", "permanent": true },
+    { "source": "/NT-Tech/(.*)", "destination": "/nt-tech", "permanent": true },
+    { "source": "/NT-TECH", "destination": "/nt-tech", "permanent": true },
+    { "source": "/Nt-Tech", "destination": "/nt-tech", "permanent": true }
+  ],
   "rewrites": [
-    { "source": "/NT-Tech", "destination": "/nt-tech.html" },
-    { "source": "/nt-tech", "destination": "/nt-tech.html" }
+    { "source": "/NT-Tech", "destination": "/nt-tech" },
+    { "source": "/nt-tech", "destination": "/nt-tech" }
   ]
 }
