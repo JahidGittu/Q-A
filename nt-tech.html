@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0d17" id="metaThemeColor" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>NT Tech Innovation — Special Interview Mastery Portal | Full-Stack, Database, DevOps & SaaS</title>
+  <meta name="description" content="NT Tech Innovation স্পেশাল ফুল-স্ট্যাক সফটওয়্যার ইঞ্জিনিয়ার ইন্টারভিউ প্রস্তুতি: React, Next.js, Node.js, Express, PostgreSQL, Prisma, MongoDB, Linux, Docker, Nginx, PM2, CI/CD ও Dokani Multi-Tenant SaaS রিয়েল-ওয়ার্ল্ড কেস স্টাডি।" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="nt-tech.css" />
+</head>
+<body>
+  <!-- Ambient glow backdrop -->
+  <div class="bg-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <!-- Desktop Sticky Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">🚀</div>
+      <div class="brand-text">
+        <div class="brand-title">NT Tech Innovation</div>
+        <div class="brand-sub">Special Interview Mastery</div>
+      </div>
+    </div>
+
+    <!-- Quick Back to General Bank -->
+    <a href="/" class="back-link">
+      <span>⬅️ মূল প্রশ্নব্যাংক (RangdhanuIT)</span>
+    </a>
+
+    <!-- Overall Mastery Progress -->
+    <div class="overall-box">
+      <div class="overall-row">
+        <span>মোট প্রস্তুতি সম্পন্ন</span>
+        <b id="overallPct">0%</b>
+      </div>
+      <div class="progress-bar-bg"><i id="overallBar"></i></div>
+      <div class="overall-row small">
+        <span id="overallCount">0 / 0</span>
+        <button class="reset-link-btn" id="resetBtn" title="সব হিসেব রিসেট করো">Reset</button>
+      </div>
+    </div>
+
+    <!-- Category Nav List (Asynchronously Switched) -->
+    <div class="nav-title">কেটাগরি সিলেক্ট করো</div>
+    <nav class="cat-nav" id="catNav" aria-label="NT Tech Categories"></nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <small>Dokani SaaS · PTTABD · Lakdhanavi</small>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrap -->
+  <div class="main-wrap">
+    <!-- Topbar Header -->
+    <header class="topbar">
+      <!-- Mobile Header Row -->
+      <div class="mobile-top-bar mobile-only">
+        <div class="m-brand-left">
+          <span class="m-brand-logo">🚀</span>
+          <div class="m-brand-info">
+            <b>NT Tech Prep</b>
+            <span class="m-brand-role" id="mobileCurrentCatTitle">Frontend Engineering</span>
+          </div>
+        </div>
+        <div class="m-brand-right">
+          <span class="m-progress-pill" id="mobileProgressPill">0% সম্পন্ন</span>
+          <button class="icon-btn" id="mobileThemeBtn" aria-label="Toggle Theme">🌙</button>
+        </div>
+      </div>
+
+      <button class="icon-btn mobile-only sidebar-trigger" id="menuBtn" aria-label="Open Sidebar">☰</button>
+      
+      <!-- Search Input -->
+      <div class="search-box">
+        <span class="search-ic">🔍</span>
+        <input id="search" type="search" placeholder="NT Tech প্রশ্ন বা উত্তর খুঁজো… ( / চাপো )" autocomplete="off" />
+        <button class="search-clear" id="searchClear" aria-label="Clear Search" style="display:none">✕</button>
+      </div>
+
+      <!-- Global Language Switcher -->
+      <div class="seg" id="langSeg" role="tablist" aria-label="Answer language">
+        <button data-lang="mix" class="active" title="সহজ বাংলা-ইংরেজি মিশ্রিত কথ্য রূপ">মিক্স</button>
+        <button data-lang="bn" title="বিশুদ্ধ প্রাতিষ্ঠানিক বাংলা">বাংলা</button>
+        <button data-lang="en" title="Fluent Technical English">English</button>
+        <button data-lang="all" title="সবগুলো ভাষা একসাথে">সব</button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="top-actions">
+        <button class="btn ghost" id="expandBtn">সব খোলো</button>
+        <button class="btn ghost" id="hideDoneBtn">Done লুকাও</button>
+        <button class="btn primary" id="mockBtn">🎯 মক ইন্টারভিউ</button>
+        <button class="icon-btn" id="themeBtn" aria-label="Theme">🌙</button>
+      </div>
+    </header>
+
+    <!-- Mobile Horizontal Category Chips Bar -->
+    <nav class="mobile-cat-chips-bar" id="mobileCatChipsBar" aria-label="Mobile Category Quick Filter">
+      <div class="mobile-cat-chips-track" id="mobileCatChipsTrack"></div>
+    </nav>
+
+    <!-- Category Banner Header -->
+    <section class="category-hero" id="catHero">
+      <div class="cat-hero-left">
+        <div class="cat-badge-wrap">
+          <span class="cat-emoji" id="catHeroIcon">⚛️</span>
+          <span class="cat-pill" id="catHeroBadge">React · Next.js · TypeScript</span>
+        </div>
+        <h1 class="cat-title" id="catHeroTitle">Frontend Engineering</h1>
+        <p class="cat-desc" id="catHeroDesc">লোডিং হচ্ছে...</p>
+      </div>
+      <div class="cat-hero-right">
+        <div class="cat-stat-card">
+          <span class="stat-number" id="catHeroTotalCount">0</span>
+          <span class="stat-label">সর্বমোট প্রশ্ন</span>
+        </div>
+        <div class="cat-stat-card">
+          <span class="stat-number ok-text" id="catHeroDoneCount">0</span>
+          <span class="stat-label">শেখা হয়েছে</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5-Tier Level Filter Badges (CRITICAL USER REQUIREMENT) -->
+    <section class="level-filter-bar" id="levelFilterBar" aria-label="Question Tier Filter">
+      <div class="level-filter-title">লেভেল ফিল্টার:</div>
+      <div class="level-filter-track" id="levelFilterTrack">
+        <button class="lvl-btn active" data-lvl="all">
+          <span class="lvl-dot all"></span> সব প্রশ্ন <b id="cntAll">0</b>
+        </button>
+        <button class="lvl-btn" data-lvl="lvl1">
+          <span class="lvl-dot lvl1"></span> 🟢 লেভেল ১ (বেসিক) <b id="cntLvl1">0</b>
+        </button>
+        <button class="lvl-btn" data-lvl="lvl2">
+          <span class="lvl-dot lvl2"></span> 🟡 লেভেল ২ (কাজের অভিজ্ঞতা) <b id="cntLvl2">0</b>
+        </button>
+        <button class="lvl-btn" data-lvl="lvl3">
+          <span class="lvl-dot lvl3"></span> 🟠 লেভেল ৩ (অ্যাডভান্সড/ইন্টারনালস) <b id="cntLvl3">0</b>
+        </button>
+        <button class="lvl-btn" data-lvl="situation">
+          <span class="lvl-dot situation"></span> 🟣 সিচুয়েশন বেজড <b id="cntSituation">0</b>
+        </button>
+        <button class="lvl-btn" data-lvl="realworld">
+          <span class="lvl-dot realworld"></span> 🔴 রিয়েল-ওয়ার্ল্ড (Dokani/লাইভ) <b id="cntRealworld">0</b>
+        </button>
+      </div>
+    </section>
+
+    <!-- Topic Pills Sub-navigation -->
+    <section class="topics-subnav" id="topicsSubnav" aria-label="Topic Selector">
+      <div class="topics-subnav-title">টপিক নির্বাচন করো:</div>
+      <div class="topics-chips-track" id="topicsChipsTrack"></div>
+    </section>
+
+    <!-- Main Container where Q&A Cards are rendered -->
+    <main class="content-container" id="contentContainer">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>NT Tech Innovation প্রশ্নব্যাংক প্রস্তুত করা হচ্ছে...</p>
+      </div>
+    </main>
+
+    <!-- Bottom Mobile Nav Bar (Modern Native Dock) -->
+    <nav class="mobile-bottom-nav mobile-only" id="mobileBottomNav" aria-label="Mobile Navigation">
+      <button class="m-nav-item active" id="mNavCategories" data-target="categories">
+        <span class="m-nav-icon">📂</span>
+        <span class="m-nav-label">কেটাগরি</span>
+      </button>
+      <button class="m-nav-item" id="mNavTopics" data-target="topics">
+        <span class="m-nav-icon">📑</span>
+        <span class="m-nav-label">টপিক</span>
+      </button>
+      <button class="m-nav-item" id="mNavLevels" data-target="levels">
+        <span class="m-nav-icon">🎯</span>
+        <span class="m-nav-label">লেভেল</span>
+      </button>
+      <button class="m-nav-item" id="mNavSearch" data-target="search">
+        <span class="m-nav-icon">🔍</span>
+        <span class="m-nav-label">সার্চ</span>
+      </button>
+      <button class="m-nav-item" id="mNavMock" data-target="mock">
+        <span class="m-nav-icon">⚡</span>
+        <span class="m-nav-label">মক টেস্ট</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Mobile Bottom Sheet Dialog / Modal Container -->
+  <div class="bottom-sheet-overlay" id="bottomSheetOverlay" style="display:none">
+    <div class="bottom-sheet-card" id="bottomSheetCard">
+      <div class="bottom-sheet-drag-handle"></div>
+      <div class="bottom-sheet-header">
+        <h3 id="bottomSheetTitle">নির্বাচন করুন</h3>
+        <button class="bottom-sheet-close" id="bottomSheetClose" aria-label="Close">✕</button>
+      </div>
+      <div class="bottom-sheet-content" id="bottomSheetContent"></div>
+    </div>
+  </div>
+
+  <!-- Mock Interview Modal -->
+  <div class="modal-overlay" id="mockModalOverlay" style="display:none">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-badge">🎯 NT Tech Mock Interview</div>
+        <button class="modal-close" id="mockModalClose">✕</button>
+      </div>
+      <div class="modal-body" id="mockModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn ghost" id="mockNextBtn">অন্য প্রশ্ন আনো 🎲</button>
+        <button class="btn primary" id="mockDoneBtn">শেখা হয়েছে মার্ক করো ✅</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-hub" id="toastHub"></div>
+
+  <!-- Async Category Data Modules (Loaded in sequential asynchronous order) -->
+  <script src="data-nt-tech/01-frontend.js"></script>
+  <script src="data-nt-tech/02-backend.js"></script>
+  <script src="data-nt-tech/03-database.js"></script>
+  <script src="data-nt-tech/04-devops.js"></script>
+  <script src="data-nt-tech/05-dokani.js"></script>
+  <script src="data-nt-tech/06-hr.js"></script>
+
+  <!-- Core App Controller Engine -->
+  <script src="nt-tech.js"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npx serve .",
     "dev": "npx serve .",
-    "validate": "node --check app.js && node -e \"const fs=require('fs'); fs.readdirSync('data').forEach(f => require('child_process').execSync('node --check data/' + f)); console.log('All JS validated successfully!')\"",
+    "validate": "node --check app.js && node --check nt-tech.js && node -e \"const fs=require('fs'); ['data', 'data-nt-tech'].forEach(dir => fs.readdirSync(dir).forEach(f => { if(f.endsWith('.js')) require('child_process').execSync('node --check ' + dir + '/' + f); })); console.log('All JS validated successfully!')\"",
     "build": "npm run validate"
   },
   "keywords": [

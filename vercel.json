@@ -1,5 +1,9 @@
 {
   "version": 2,
   "cleanUrls": true,
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/NT-Tech", "destination": "/nt-tech.html" },
+    { "source": "/nt-tech", "destination": "/nt-tech.html" }
+  ]
 }
